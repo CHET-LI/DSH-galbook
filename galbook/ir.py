@@ -1,7 +1,7 @@
-"""中间格式 galplay/1（引擎无关）。完整说明见 SCHEMA.md。
+"""中间格式 galbook/1（引擎无关）。完整说明见 SCHEMA.md。
 
 books/<slug>/story/story.json
-  {"format": "galplay/1", "title", "engine", "importer", "entry": {"scene", "label"},
+  {"format": "galbook/1", "title", "engine", "importer", "entry": {"scene", "label"},
    "scenes": {"<id>": {"title", "file", "tags": [...], "route"}},
    "routes": [{"id", "title", "start": {"scene", "label"}}],
    "system_vars": [...], "stats": {...}, "warnings": [...]}
@@ -28,7 +28,7 @@ import json
 import os
 import threading
 
-FORMAT = "galplay/1"
+FORMAT = "galbook/1"
 OPS = {"say", "bg", "cg", "sprite", "sprites_clear", "bgm", "label", "choice", "jump", "call", "ret",
        "set", "event", "end"}
 

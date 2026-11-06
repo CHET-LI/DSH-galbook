@@ -1,4 +1,4 @@
-"""galscript（.gal）：一种人手能写、程序好生成的剧本格式 → galplay/1。
+"""galscript（.gal）：一种人手能写、程序好生成的剧本格式 → galbook/1。
 
 用途：①自己写互动故事给 agent 玩；②给没有现成导入器的引擎写转换脚本时，先转成 .gal 再导入（最省事）。
 
@@ -207,7 +207,7 @@ def build(src, assets=None, **_):
             seen_r.add(r)
             routes.append({"id": r, "title": r, "start": {"scene": sid, "label": None}})
     data = {k: v.data() for k, v in scenes.items()}
-    meta = {"format": "galplay/1", "title": meta_kv.get("title", ""), "engine": "galscript", "importer": "galplay-galscript-1",
+    meta = {"format": "galbook/1", "title": meta_kv.get("title", ""), "engine": "galscript", "importer": "galbook-galscript-1",
             "entry": {"scene": order[0], "label": None},
             "scenes": {k: {"title": v["title"], "tags": v["tags"], "route": v["route"]} for k, v in data.items()},
             "routes": routes, "system_vars": sorted(sysv),

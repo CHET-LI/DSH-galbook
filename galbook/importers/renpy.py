@@ -1,4 +1,4 @@
-"""Ren'Py（.rpy 源码）→ galplay/1。新游戏最常见的引擎之一；只吃 .rpy 源码（.rpyc 先用 unrpyc 反编译）。
+"""Ren'Py（.rpy 源码）→ galbook/1。新游戏最常见的引擎之一；只吃 .rpy 源码（.rpyc 先用 unrpyc 反编译）。
 
 认的写法：
   define e = Character("名字", …)          说话人
@@ -129,7 +129,7 @@ class Importer(object):
             st.add("set", expr="%s = %s" % (name, val))
         st.add("jump", scene=self.label_scene[self.entry], label=self.entry)
         self.scenes["__start__"] = st.data()
-        meta = {"format": "galplay/1", "title": "", "engine": "renpy", "importer": "galplay-renpy-1",
+        meta = {"format": "galbook/1", "title": "", "engine": "renpy", "importer": "galbook-renpy-1",
                 "entry": {"scene": "__start__", "label": "top"},
                 "scenes": {k: {"title": v["title"], "tags": v["tags"]} for k, v in self.scenes.items()},
                 "routes": [], "system_vars": sorted(self.system_vars),

@@ -2,7 +2,7 @@
 
 ## 1. `.gal` 手写格式
 
-给自己写故事、手工移植、或者给某个引擎写「转换脚本」的输出目标。一个目录里可以有多个 `.gal`，按文件名顺序读。完整例子：[`galplay/demo/fog-harbor/story.gal`](../galplay/demo/fog-harbor/story.gal)。
+给自己写故事、手工移植、或者给某个引擎写「转换脚本」的输出目标。一个目录里可以有多个 `.gal`，按文件名顺序读。完整例子：[`galbook/demo/fog-harbor/story.gal`](../galbook/demo/fog-harbor/story.gal)。
 
 ```
 title: 我的故事            ← 文件开头的 key: value 是元信息（title / author / license …）
@@ -52,16 +52,16 @@ def build(src, assets=None, **opts):  # 必须：返回 (meta, scenes)
     ...
 ```
 
-`scenes` 是 `{场景id: {"id", "title", "ops": [...], "tags": [], "route": ""}}`，`ops` 是 [SCHEMA.md](SCHEMA.md) 里的指令；`meta` 至少要有 `format: "galplay/1"`、`entry`、`scenes`。`importers/common.py` 里有现成的帮手：`SceneB`（攒指令）、`Assets`（按文件名找图，`assets.find(name)`）、`read_text`（自动认 UTF-8/Shift-JIS/GBK）、`is_h_title`。最小的完整例子：[`tests/plugins/myfmt.py`](../tests/plugins/myfmt.py)。
+`scenes` 是 `{场景id: {"id", "title", "ops": [...], "tags": [], "route": ""}}`，`ops` 是 [SCHEMA.md](SCHEMA.md) 里的指令；`meta` 至少要有 `format: "galbook/1"`、`entry`、`scenes`。`importers/common.py` 里有现成的帮手：`SceneB`（攒指令）、`Assets`（按文件名找图，`assets.find(name)`）、`read_text`（自动认 UTF-8/Shift-JIS/GBK）、`is_h_title`。最小的完整例子：[`tests/plugins/myfmt.py`](../tests/plugins/myfmt.py)。
 
 用法：
 
 ```bash
-python3 -m galplay build --plugin myengine.py --src 解包目录 --out books/x/story
-GALPLAY_PLUGINS=/path/to/plugins python3 -m galplay detect 解包目录    # 目录或文件，多个用 : 分隔（Windows 用 ;）
+python3 -m galbook build --plugin myengine.py --src 解包目录 --out books/x/story
+GALPLAY_PLUGINS=/path/to/plugins python3 -m galbook detect 解包目录    # 目录或文件，多个用 : 分隔（Windows 用 ;）
 ```
 
-插件比内置导入器先识别。`build` 会跑同一套校验，所以插件输出错了也会被指出来。写好了欢迎 PR 进 `galplay/importers/`。
+插件比内置导入器先识别。`build` 会跑同一套校验，所以插件输出错了也会被指出来。写好了欢迎 PR 进 `galbook/importers/`。
 
 ### 写导入器的建议
 

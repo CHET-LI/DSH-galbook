@@ -29,7 +29,7 @@ def build(src, assets=None, **_):
                     who, _, text = line.rpartition("|")
                     ops.append({"op": "say", "who": who, "text": text})
     scenes = {"main": {"id": "main", "title": "main", "ops": ops, "tags": [], "route": ""}}
-    meta = {"format": "galplay/1", "title": "myfmt demo", "engine": "myfmt", "importer": "myfmt-plugin",
+    meta = {"format": "galbook/1", "title": "myfmt demo", "engine": "myfmt", "importer": "myfmt-plugin",
             "entry": {"scene": "main", "label": None}, "scenes": {"main": {"title": "main", "tags": []}},
             "routes": [], "system_vars": [], "stats": {"says": sum(o["op"] == "say" for o in ops)}, "warnings": []}
     return meta, scenes

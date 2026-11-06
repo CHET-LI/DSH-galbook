@@ -1,4 +1,4 @@
-"""各引擎脚本 → galplay/1 中间格式。
+"""各引擎脚本 → galbook/1 中间格式。
 
 内置：qlie / kag（吉里吉里·Tyrano）/ renpy / nscripter / galscript（.gal 手写格式）/ textdump（VNTextPatch 等文本导出，线性）
 插件：环境变量 GALPLAY_PLUGINS（多个用 os.pathsep 分隔）指向 .py 文件或目录；或 build 时 --plugin x.py。
@@ -15,7 +15,7 @@ _plugins = {}
 
 def load_plugin(path):
     """加载一个插件文件，返回它的 NAME。"""
-    spec = importlib.util.spec_from_file_location("galplay_plugin_%d" % len(_plugins), path)
+    spec = importlib.util.spec_from_file_location("galbook_plugin_%d" % len(_plugins), path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     if not getattr(mod, "NAME", None) or not callable(getattr(mod, "build", None)):

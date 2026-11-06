@@ -1,4 +1,4 @@
-# galplay/1 中间格式（引擎无关 IR）
+# galbook/1 中间格式（引擎无关 IR）
 
 一句话：**每个引擎的导入器把原脚本翻成同一种「指令列表」，播放器只认这一种**。新引擎 = 新写一个导入器，播放器、存档、HTTP、界面一行不改。
 
@@ -7,7 +7,7 @@
 ```
 books/<书>/
 ├── assets/…                    图片（路径相对书目录；服务只对外放这个目录）
-└── story/                      python3 -m galplay build 的输出
+└── story/                      python3 -m galbook build 的输出
     ├── story.json              目录 + 路线 + 统计
     └── scenes/<文件>.json      每个场景一份指令列表
 ```
@@ -18,7 +18,7 @@ books/<书>/
 
 | 字段 | 说明 |
 |---|---|
-| `format` | 固定 `"galplay/1"` |
+| `format` | 固定 `"galbook/1"` |
 | `title` / `engine` / `importer` | 书名 / 原引擎 / 导入器名+版本 |
 | `mode` | `branch`（默认）或 `linear`（文本导出类导入器，没有分支） |
 | `entry` | `{"scene", "label"}` 新游戏从哪开始 |

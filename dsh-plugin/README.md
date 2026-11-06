@@ -7,19 +7,19 @@
 cd DSH-galbook
 
 # 2. 装演示书（中文 + 英文两本，几十 KB）
-python -m galplay demo --books books
+python -m galbook demo --books books
 
 # 3. 挂进 dsh（自动找 profile、自动备份、自动填路径）
 python dsh-plugin/install.py
 ```
 
-然后重启 DeepSeek Harness，新建会话问一句「galplay 有哪些工具？」，能看到 14 个就成了。
+然后重启 DeepSeek Harness，新建会话问一句「galbook 有哪些工具？」，能看到 14 个就成了。
 
 ## 它会做什么
 
 - 找到 `<dsh-home>/profiles/<profile>/cordis.patch.yml`（默认 profile `desktop`，`dsh-home` 默认 `~/.dsh`，可用 `DSH_HOME` 或 `--home` 指定）
 - 先备份成 `cordis.patch.yml.bak-时间戳`
-- 在文件末尾追加一段 `mcp-galplay`（stdio 方式，dsh 自己拉起 `python -m galplay mcp`），里面的路径按你这台机器填好
+- 在文件末尾追加一段 `mcp-galbook`（stdio 方式，dsh 自己拉起 `python -m galbook mcp`），里面的路径按你这台机器填好
 - 不动 dsh 本体，不动别的配置条目；重复执行不会写两遍
 
 ```bash
@@ -31,12 +31,12 @@ python dsh-plugin/install.py --remove           # 卸载
 
 ## 另外两种接法
 
-- **共享服务**：`python -m galplay serve --books books --port 8765`，多个 agent 共用一个进程，令牌绑定名字，URL 里冒名无效。配置见 `integrations/deepseek-harness/galplay-http.patch.yml`。
-- **命令行**：`python -m galplay do next n=20`，给只有 shell 的 agent 用，最后一行就是下一步该跑的命令。
+- **共享服务**：`python -m galbook serve --books books --port 8765`，多个 agent 共用一个进程，令牌绑定名字，URL 里冒名无效。配置见 `integrations/deepseek-harness/galbook-http.patch.yml`。
+- **命令行**：`python -m galbook do next n=20`，给只有 shell 的 agent 用，最后一行就是下一步该跑的命令。
 
 ## 技能文件
 
-`.agents/skills/galplay/SKILL.md` 已经在包里。从仓库根启动 dsh 时会自动发现，里面写明了「不准偷看剧本文件」——agent 只能通过工具一步步读剧情。
+`.agents/skills/galbook/SKILL.md` 已经在包里。从仓库根启动 dsh 时会自动发现，里面写明了「不准偷看剧本文件」——agent 只能通过工具一步步读剧情。
 
 ## 出问题怎么办
 

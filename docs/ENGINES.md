@@ -1,6 +1,6 @@
 # 各引擎支持情况
 
-galplay 不解包、不解密、不运行游戏。你需要先用自己的工具把**剧本文本**和**图片**拿出来（常用：GARbro、KrkrExtract、unrpa/unrpyc、各引擎社区工具），再交给 `python3 -m galplay build`。
+galbook 不解包、不解密、不运行游戏。你需要先用自己的工具把**剧本文本**和**图片**拿出来（常用：GARbro、KrkrExtract、unrpa/unrpyc、各引擎社区工具），再交给 `python3 -m galbook build`。
 
 图例：✅ 分支（选项、路线、条件、跨周目变量都能玩） · 📖 线性（只能从头读到尾，没有选项） · 🛠 欢迎贡献
 

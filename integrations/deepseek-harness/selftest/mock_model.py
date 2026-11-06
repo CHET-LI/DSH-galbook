@@ -1,5 +1,5 @@
-"""不花钱的自测：一个假的 Anthropic Messages 端点，按固定脚本让 dsh 调 galplay（MCP 或 shell+CLI）。
-真模型不会这么死板——这里只证明「dsh 能挂上 galplay、工具能调通、技能能被发现」。
+"""不花钱的自测：一个假的 Anthropic Messages 端点，按固定脚本让 dsh 调 galbook（MCP 或 shell+CLI）。
+真模型不会这么死板——这里只证明「dsh 能挂上 galbook、工具能调通、技能能被发现」。
 
   python3 mock_model.py --port 9911 --mode mcp|cli --books B --data D [--log mock.log]
   DEEPSEEK_API_KEY=sk-fake DEEPSEEK_BASE_URL=http://127.0.0.1:9911 dsh headless --patch ... "玩一下"
@@ -13,10 +13,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 def script(mode, books, data):
     if mode == "cli":
-        env = "GALPLAY_BOOKS=%s GALPLAY_DATA=%s GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=dsh-cli %s -m galplay do " % (books, data, sys.executable)
-        return [("skill", {"name": "galplay"})] + [("bash", {"command": env + c, "description": "galplay " + c.split()[0]})
+        env = "GALPLAY_BOOKS=%s GALPLAY_DATA=%s GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=dsh-cli %s -m galbook do " % (books, data, sys.executable)
+        return [("skill", {"name": "galbook"})] + [("bash", {"command": env + c, "description": "galbook " + c.split()[0]})
                                                    for c in ("new", "next n=20", "choose i=2 reason=留在灯旁边帮她", "next n=20")]
-    p = "mcp__galplay__galplay_"
+    p = "mcp__galbook__galbook_"
     return [(p + "help", {}), (p + "persona", {"text": "好奇心重，胆子大"}), (p + "new", {}), (p + "next", {"n": 20}),
             (p + "choose", {"i": 1, "reason": "她一个人走夜路太危险，我陪她去"}), (p + "next", {"n": 20})]
 
@@ -50,7 +50,7 @@ def main():
                         cc = c.get("content")
                         results.append(cc if isinstance(cc, str) else " ".join(x.get("text", "") for x in cc or []))
             whole = json.dumps(body, ensure_ascii=False)
-            log.write(json.dumps({"galplay_tools": sorted(t for t in tools if "galplay" in t), "skill_listed": "`galplay`:" in whole,
+            log.write(json.dumps({"galbook_tools": sorted(t for t in tools if "galbook" in t), "skill_listed": "`galbook`:" in whole,
                                   "step": len(results), "last_result": results[-1][:400] if results else None}, ensure_ascii=False) + "\n")
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")

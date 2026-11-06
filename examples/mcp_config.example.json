@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "galplay": {
+    "galbook": {
       "command": "python3",
       "args": [
         "-m",
-        "galplay",
+        "galbook",
         "mcp",
         "--books",
         "/path/to/books",
@@ -17,9 +17,9 @@
         "--lang",
         "zh"
       ],
-      "cwd": "/path/to/galplay-repo",
+      "cwd": "/path/to/galbook-repo",
       "env": {
-        "PYTHONPATH": "/path/to/galplay-repo"
+        "PYTHONPATH": "/path/to/galbook-repo"
       }
     }
   }

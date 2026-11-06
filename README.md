@@ -1,12 +1,16 @@
-# galplay
+# galbook
+
+> 仓库：**DSH-galbook**（dsh 插件市场里的名字）；命令和包名统一叫 `galbook`。
 
 **让 agent 像人一样玩 galgame / 视觉小说**：一句一句读剧情，遇到选项自己选并写理由，存档、读档、回到上个选项、多周目解锁隐藏线。很多 agent 可以同时玩同一本书，各自的进度互不干扰。
 
 [English](README.en.md)
 
-> **用 DeepSeek Harness？** 这个仓库就是一个 dsh 插件：三种接法——dsh 自己拉起 `python -m galplay mcp` 子进程、一个共享 `serve` 服务（令牌绑定名字，多个 agent 共用）、`python -m galplay do next` 命令行；仓库里的 `.agents/skills/galplay/SKILL.md` 在你从仓库根启动 dsh 时会被自动发现。配置和自测脚本见 [integrations/deepseek-harness](integrations/deepseek-harness/)，**不需要 API key**。
+> **装进 DeepSeek Harness（一行链接）**：dsh 的插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galbook`，装完重启 dsh，新会话里会多出 14 个 `galbook_*` 工具。连不上 GitHub 时改用本地目录或 `galbook-1.1.0.tgz`，见 [dsh-plugin/README.md](dsh-plugin/README.md)。
+>
+> 不想用插件面板也行：`python dsh-plugin/install.py` 直接改 profile（自动备份、可 `--remove` 卸掉）。**不需要 API key**。
 
-> **不想 clone？** 到 [Release](https://github.com/CHET-LI/DSH-galbook/releases/latest) 下 `dsh-plugin-*.zip`，解开后两条命令：`python -m galplay demo --books books` → `python dsh-plugin/install.py`。完。
+> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galbook/releases/latest) 里有 `galbook-1.1.0.zip`（源码）、`galbook-1.1.0.tgz`（npm 包，可直接给插件面板当本地来源）、`dsh-plugin-1.1.0.zip`（带安装脚本）。
 
 - 只用 Python 标准库，没有依赖
 - 接法：**纯文本 HTTP**（最省 token，什么 agent 都能用）、**JSON API**、**MCP**（stdio 和 Streamable HTTP）、**CLI**（给只有 shell 的 agent）、**技能文件**（Anthropic Skill 格式），另外导出 **OpenAI function-calling** 工具定义
@@ -16,14 +20,14 @@
 
 ![三个 agent 同时在玩，网页上看其中一个](docs/img/watch.png)
 
-> ⚠️ **版权**：本仓库只有代码和自己写的演示故事。游戏的剧本、图片、音乐归原作者/厂商所有。请只导入你自己合法拥有的游戏，导出的剧本和图片**不要上传或分发**。galplay 不带任何解包/解密工具，也不会运行游戏的 exe。
+> ⚠️ **版权**：本仓库只有代码和自己写的演示故事。游戏的剧本、图片、音乐归原作者/厂商所有。请只导入你自己合法拥有的游戏，导出的剧本和图片**不要上传或分发**。galbook 不带任何解包/解密工具，也不会运行游戏的 exe。
 
 ## 30 秒试玩
 
 ```bash
-git clone <本仓库> galplay && cd galplay
-python3 -m galplay demo --books books          # 装两本自带演示：fog-harbor（中文）、fog-harbor-en（英文）
-python3 -m galplay serve --books books          # http://127.0.0.1:8765/play/
+git clone <本仓库> galbook && cd galbook
+python3 -m galbook demo --books books          # 装两本自带演示：fog-harbor（中文）、fog-harbor-en（英文）
+python3 -m galbook serve --books books          # http://127.0.0.1:8765/play/
 ```
 
 让一个 agent 去玩——它只需要会发 HTTP GET：
@@ -72,12 +76,12 @@ python3 examples/party.py --book fog-harbor
 ## 接到你的 agent
 
 - **任何能发 HTTP 的 agent**：上面的文本接口。说明页 `/play/t`（英文 `/play/t?lang=en`）可以直接塞进 system prompt。
-- **MCP（stdio）**（Claude Desktop、Cursor、Cline、dsh 等）：`python3 -m galplay mcp --books books --data play-data --book fog-harbor --agent alice`，配置见 [examples/mcp_config.example.json](examples/mcp_config.example.json)
+- **MCP（stdio）**（Claude Desktop、Cursor、Cline、dsh 等）：`python3 -m galbook mcp --books books --data play-data --book fog-harbor --agent alice`，配置见 [examples/mcp_config.example.json](examples/mcp_config.example.json)
 - **MCP（Streamable HTTP）**：`serve` 自带 `POST /mcp?book=…&agent=…`，一个服务给很多 agent，配合令牌用
 - **DeepSeek Harness**：`python dsh-plugin/install.py` 一条命令装好（自动找 profile、备份、填路径），细节和另外两种接法见 [dsh-plugin](dsh-plugin/) 与 [integrations/deepseek-harness](integrations/deepseek-harness/)
-- **技能**：[.agents/skills/galplay/SKILL.md](.agents/skills/galplay/SKILL.md)，复制到 `~/.agents/skills/`（dsh）或 `.claude/skills/` 即可
-- **OpenAI function calling**：`python3 -m galplay tools --format openai > tools.json`，执行时调 `galplay.tools.call_tool(...)`
-- **命令行**：`GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice python3 -m galplay do next n=20`（输出最后一行就是下一步命令）
+- **技能**：[.agents/skills/galbook/SKILL.md](.agents/skills/galbook/SKILL.md)，复制到 `~/.agents/skills/`（dsh）或 `.claude/skills/` 即可
+- **OpenAI function calling**：`python3 -m galbook tools --format openai > tools.json`，执行时调 `galbook.tools.call_tool(...)`
+- **命令行**：`GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice python3 -m galbook do next n=20`（输出最后一行就是下一步命令）
 
 详见 [docs/AGENTS.md](docs/AGENTS.md)。
 
@@ -86,8 +90,8 @@ python3 examples/party.py --book fog-harbor
 ## 导入你自己的游戏
 
 ```bash
-python3 -m galplay detect 解包目录                      # 认引擎、告诉你缺什么
-python3 -m galplay build --src 解包目录 --out books/我的书/story --assets-dir books/我的书
+python3 -m galbook detect 解包目录                      # 认引擎、告诉你缺什么
+python3 -m galbook build --src 解包目录 --out books/我的书/story --assets-dir books/我的书
 ```
 
 | 引擎 | 支持程度 |
@@ -121,4 +125,4 @@ python3 -m unittest discover -s tests -v
 
 ## 许可
 
-代码 MIT（见 [LICENSE](LICENSE)）。`galplay/demo/` 里的演示故事和图是 CC0。
+代码 MIT（见 [LICENSE](LICENSE)）。`galbook/demo/` 里的演示故事和图是 CC0。

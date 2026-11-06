@@ -1,4 +1,4 @@
-"""NScripter / ONScripter（0.txt…9.txt 或 nscript.dat）→ galplay/1。老游戏、同人作品很多是这个。
+"""NScripter / ONScripter（0.txt…9.txt 或 nscript.dat）→ galbook/1。老游戏、同人作品很多是这个。
 
 nscript.dat 每字节 XOR 0x84 就是文本。认的写法：
   *label   ;注释   一行多条用 : 分隔
@@ -160,7 +160,7 @@ class Importer(object):
             raise ValueError("脚本里没有 *start")
         start.add("jump", scene="script", label=ent)
         scenes = {"__start__": start.data(), "script": b.data()}
-        meta = {"format": "galplay/1", "title": "", "engine": "nscripter", "importer": "galplay-nscripter-1",
+        meta = {"format": "galbook/1", "title": "", "engine": "nscripter", "importer": "galbook-nscripter-1",
                 "entry": {"scene": "__start__", "label": "top"},
                 "scenes": {k: {"title": v["title"], "tags": v["tags"]} for k, v in scenes.items()},
                 "routes": [], "system_vars": sorted(self.system_vars),

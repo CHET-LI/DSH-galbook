@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "galbook · galgame",
-    "description": "Lets an agent read a visual novel and pick choices by itself. Adds 14 galplay_* tools."
+    "description": "Lets an agent read a visual novel and pick choices by itself. Adds 14 galbook_* tools."
   }
 }

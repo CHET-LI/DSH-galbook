@@ -1,4 +1,4 @@
-"""python3 -m unittest discover -s tests -v   （在 galplay/ 目录下跑；只用自带样例，不碰任何商业游戏数据）"""
+"""python3 -m unittest discover -s tests -v   （在 galbook/ 目录下跑；只用自带样例，不碰任何商业游戏数据）"""
 import json
 import os
 import shutil
@@ -17,12 +17,12 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 SAMPLES = os.path.join(HERE, "samples")
 
-from galplay import engine  # noqa: E402
-from galplay.expr import evaluate, assign  # noqa: E402
-from galplay.importers import detect, get  # noqa: E402
-from galplay.importers.common import Assets  # noqa: E402
-from galplay.ir import validate, story_from_dict, save_story, load_story  # noqa: E402
-from galplay.play import Library  # noqa: E402
+from galbook import engine  # noqa: E402
+from galbook.expr import evaluate, assign  # noqa: E402
+from galbook.importers import detect, get  # noqa: E402
+from galbook.importers.common import Assets  # noqa: E402
+from galbook.ir import validate, story_from_dict, save_story, load_story  # noqa: E402
+from galbook.play import Library  # noqa: E402
 
 ENGINES = ("qlie", "kag", "renpy", "nscripter")
 
@@ -222,7 +222,7 @@ def free_port():
 
 
 class TestHTTPConcurrent(unittest.TestCase):
-    """真起 python3 -m galplay serve，50 个 agent 同时玩；再 20 个线程抢同一个 agent。"""
+    """真起 python3 -m galbook serve，50 个 agent 同时玩；再 20 个线程抢同一个 agent。"""
 
     @classmethod
     def setUpClass(cls):
@@ -233,7 +233,7 @@ class TestHTTPConcurrent(unittest.TestCase):
         with open(os.path.join(cls.tmp, "books", "light", "assets", "bg.svg"), "w") as f:
             f.write("<svg xmlns='http://www.w3.org/2000/svg'/>")
         cls.port = free_port()
-        cls.proc = subprocess.Popen([sys.executable, "-m", "galplay", "serve", "--books", os.path.join(cls.tmp, "books"),
+        cls.proc = subprocess.Popen([sys.executable, "-m", "galbook", "serve", "--books", os.path.join(cls.tmp, "books"),
                                      "--data", os.path.join(cls.tmp, "play-data"), "--port", str(cls.port), "--quiet"],
                                     cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(50):
@@ -261,7 +261,7 @@ class TestHTTPConcurrent(unittest.TestCase):
 
     def test_routes(self):
         self.assertEqual(self.get("/")[0], 200)                       # 302 → /play/
-        self.assertIn("galplay", self.get("/play/")[1])
+        self.assertIn("galbook", self.get("/play/")[1])
         self.assertIn("/play/t/", self.get("/play/t")[1])
         self.assertIn("do=next", self.get("/play/t?lang=en")[1])
         self.assertEqual(self.code("/b/light/assets/bg.svg"), 200)

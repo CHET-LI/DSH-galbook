@@ -1,4 +1,4 @@
-"""文本导出（线性）→ galplay/1：给「暂时没有专用导入器」的引擎兜底。
+"""文本导出（线性）→ galbook/1：给「暂时没有专用导入器」的引擎兜底。
 
 很多引擎已经有成熟的文本抽取工具，抽出来的东西能直接喂进来，先「能读」：
   * VNTextPatch（arcusmaximus，MIT）`extractlocal <游戏脚本目录> <输出目录>` 产出的 .json
@@ -120,7 +120,7 @@ def build(src, assets=None, **_):
         stats["jumps"] += 1
     scenes[order[-1]].add("end", kind="ending", name="全文完")
     data = {k: v.data() for k, v in scenes.items()}
-    meta = {"format": "galplay/1", "title": "", "engine": "textdump", "importer": "galplay-textdump-1", "mode": "linear",
+    meta = {"format": "galbook/1", "title": "", "engine": "textdump", "importer": "galbook-textdump-1", "mode": "linear",
             "entry": {"scene": order[0], "label": "top"},
             "scenes": {k: {"title": v["title"], "tags": v["tags"]} for k, v in data.items()},
             "routes": [], "system_vars": [], "stats": dict(stats, unknown=[], assets=assets.report()),

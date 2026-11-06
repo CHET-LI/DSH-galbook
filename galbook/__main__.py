@@ -1,15 +1,15 @@
-"""python3 -m galplay <命令> …
+"""python3 -m galbook <命令> …
 
-  build   把解包目录转成可玩剧本      python3 -m galplay build --src 解包目录 --out books/<书>/story
-  detect  只认引擎                    python3 -m galplay detect 目录
-  serve   起 HTTP 服务（页面+接口）   python3 -m galplay serve --books books --data play-data
-  mcp     MCP 服务（stdio）           python3 -m galplay mcp --books books --data play-data --agent alice
-  play    命令行里玩一步              python3 -m galplay play books play-data <书> <名字> next n=20
+  build   把解包目录转成可玩剧本      python3 -m galbook build --src 解包目录 --out books/<书>/story
+  detect  只认引擎                    python3 -m galbook detect 目录
+  serve   起 HTTP 服务（页面+接口）   python3 -m galbook serve --books books --data play-data
+  mcp     MCP 服务（stdio）           python3 -m galbook mcp --books books --data play-data --agent alice
+  play    命令行里玩一步              python3 -m galbook play books play-data <书> <名字> next n=20
   do      同上，参数走环境变量（给 shell 工具用）
                                       GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice
-                                      python3 -m galplay do next n=20 ；python3 -m galplay do books ；python3 -m galplay do help
-  tools   打印工具定义                python3 -m galplay tools --format openai|mcp
-  demo    装自带的演示故事到 books/   python3 -m galplay demo --books books
+                                      python3 -m galbook do next n=20 ；python3 -m galbook do books ；python3 -m galbook do help
+  tools   打印工具定义                python3 -m galbook tools --format openai|mcp
+  demo    装自带的演示故事到 books/   python3 -m galbook demo --books books
   version"""
 import sys
 
@@ -25,7 +25,7 @@ def _utf8_stdio():
 
 
 def do(argv):
-    """galplay do <动作> [k=v …] [--book B] [--agent A] [--books DIR] [--data DIR] [--lang en]"""
+    """galbook do <动作> [k=v …] [--book B] [--agent A] [--books DIR] [--data DIR] [--lang en]"""
     import os
     from .play import Library
     from . import tools
@@ -48,14 +48,14 @@ def do(argv):
     book = kw.pop("book", None) or flags.get("book") or os.environ.get("GALPLAY_BOOK")
     agent = kw.pop("agent", None) or flags.get("agent") or os.environ.get("GALPLAY_AGENT")
     lang = flags.get("lang") or os.environ.get("GALPLAY_LANG", "zh")
-    name = "galplay_" + {"skip": "next"}.get(action, action)
+    name = "galbook_" + {"skip": "next"}.get(action, action)
     if action == "skip":
         kw["skip_read"] = True
     if "n" in kw:
         kw["n"] = int(kw["n"])
     if "steps" in kw:
         kw["steps"] = int(kw["steps"])
-    if name == "galplay_choose" and kw.get("i", "random") != "random":
+    if name == "galbook_choose" and kw.get("i", "random") != "random":
         kw["i"] = int(kw["i"])
     if "img" in kw:
         kw["img"] = kw["img"] in ("1", "true")
@@ -105,12 +105,12 @@ def main(argv=None):
 
 
 def demo(argv):
-    """把 galplay/demo/ 下的演示故事编译进 books/（图一起拷过去）。"""
+    """把 galbook/demo/ 下的演示故事编译进 books/（图一起拷过去）。"""
     import argparse
     import os
     import shutil
     from .build import main as build
-    ap = argparse.ArgumentParser(prog="galplay demo")
+    ap = argparse.ArgumentParser(prog="galbook demo")
     ap.add_argument("--books", default="books")
     a = ap.parse_args(argv)
     root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo")
@@ -125,7 +125,7 @@ def demo(argv):
         rc = build(["--src", src, "--out", os.path.join(dst, "story"), "--assets-dir", src])
         if rc:
             return rc
-    print("好了：python3 -m galplay serve --books %s   然后打开 http://127.0.0.1:8765/play/" % a.books)
+    print("好了：python3 -m galbook serve --books %s   然后打开 http://127.0.0.1:8765/play/" % a.books)
     return 0
 
 

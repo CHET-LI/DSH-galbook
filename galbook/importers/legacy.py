@@ -115,8 +115,8 @@ def build(book_dir):
             scenes[e["last"]]["ops"].append({"op": "end", "kind": "ending", "name": e["title"]})
     scenes["__start__"] = {"id": "__start__", "title": b.get("title", ""), "ops": start_ops}
     smeta["__start__"] = {"title": b.get("title", "")}
-    meta = {"format": "galplay/1", "title": b.get("title", ""), "engine": "book-legacy",
-            "importer": "galplay-legacy-1", "mode": "linear", "entry": {"scene": "__start__", "label": "top"},
+    meta = {"format": "galbook/1", "title": b.get("title", ""), "engine": "book-legacy",
+            "importer": "galbook-legacy-1", "mode": "linear", "entry": {"scene": "__start__", "label": "top"},
             "scenes": smeta, "routes": [{"id": e["first"], "title": e["title"]} for e in vol_entries],
             "warnings": ["老书稿没有原始脚本里的选项与跳转；这里的选项是按卷（路线）生成的，不代表游戏原本的分支。"]}
     return meta, scenes

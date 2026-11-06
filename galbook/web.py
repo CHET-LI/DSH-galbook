@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ERRS = (engine.PlayError, StoryError, StoreError, ValueError)
 KW = ("n", "i", "steps", "slot", "note", "reason", "h", "mode", "hints", "lang", "text")
 
-HELP = {"zh": """galplay —— 像人一样玩 galgame（%s）
+HELP = {"zh": """galbook —— 像人一样玩 galgame（%s）
 每个 agent 用自己的名字玩，各自的进度、存档、通关记录互不影响，可以很多个同时玩。
 
 纯文本接口（GET，一行一个操作）：
@@ -50,7 +50,7 @@ HELP = {"zh": """galplay —— 像人一样玩 galgame（%s）
   * 一次读 20~40 句再停下来想想，别一口气读到选项；
   * 选项前回想一下角色和刚才发生的事，按你自己的人设选，reason 写真实理由；
   * 想看别的结局就存档 / 回溯，不要每次都选第 1 个。
-""", "en": """galplay — play visual novels like a human (%s)
+""", "en": """galbook — play visual novels like a human (%s)
 Each agent plays under its own name with separate progress, saves and clear flags. Many agents can play at once.
 
 Plain-text API (GET, one action per request):
@@ -193,7 +193,7 @@ def _say(x, lang="zh"):
 
 def restyle(text, book, agent, style):
     """把文本里的「/play/t/书/名字?do=动作&k=v」提示改写成别的接法：
-    style="cli"  → galplay do 动作 k=v      style="tool" → galplay_动作(k=v, …)      "http" 不变。"""
+    style="cli"  → galbook do 动作 k=v      style="tool" → galbook_动作(k=v, …)      "http" 不变。"""
     if style not in ("cli", "tool"):
         return text
     pat = re.compile(r"/play/t/%s/%s\?do=(\w+)((?:&[^\s&（(]+)*)" % (re.escape(book), re.escape(agent)))
@@ -202,8 +202,8 @@ def restyle(text, book, agent, style):
         args = [a for a in m.group(2).split("&") if a]
         args = [a.split("=", 1)[0] + '="%s"' % a.split("=", 1)[1].replace("+", " ") if "+" in a else a for a in args]
         if style == "cli":
-            return " ".join(["galplay do " + m.group(1)] + args)
-        return "galplay_%s(%s)" % (m.group(1), ", ".join(args))
+            return " ".join(["galbook do " + m.group(1)] + args)
+        return "galbook_%s(%s)" % (m.group(1), ", ".join(args))
     text = pat.sub(sub, text)
     return re.sub(r"(?<=[\s（(])&(\w+=)", r"\1", text)
 

@@ -1,12 +1,16 @@
-# galplay
+# galbook
+
+> Repository: **DSH-galbook** (the name used in the dsh plugin shelf); the package and CLI are called `galbook`.
 
 **Let AI agents play visual novels like a human does**: read line by line, make choices at branch points (and say why), save, load, rewind to the previous choice, and unlock hidden routes across playthroughs. Many agents can play the same book at once; each has its own progress.
 
 [中文](README.md)
 
-> **Using DeepSeek Harness?** This repo is a dsh plugin. Three ways in: dsh spawns `python -m galplay mcp` itself, a shared `serve` process (tokens bound to names, several agents can share it), or `python -m galplay do next` from a shell. `.agents/skills/galplay/SKILL.md` is picked up automatically when you start dsh from the repo root. Setup and self-test live in [integrations/deepseek-harness](integrations/deepseek-harness/) — **no API key required**.
+> **Install into DeepSeek Harness (one link)**: dsh plugin panel → install → source `github:CHET-LI/DSH-galbook`, then restart dsh; new sessions get 14 `galbook_*` tools. If GitHub is unreachable, use a local directory or `galbook-1.1.0.tgz` — see [dsh-plugin/README.md](dsh-plugin/README.md).
+>
+> No plugin panel? `python dsh-plugin/install.py` edits the profile directly (backs it up, `--remove` to undo). **No API key required**.
 
-> **Don't want to clone?** Grab `dsh-plugin-*.zip` from [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest): `python -m galplay demo --books books` then `python dsh-plugin/install.py`. Done.
+> **Don't want to clone?** Grab `dsh-plugin-*.zip` from [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest): `python -m galbook demo --books books` then `python dsh-plugin/install.py`. Done.
 
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas
@@ -16,14 +20,14 @@
 
 ![Three agents playing at once; watching one of them in the web UI](docs/img/watch.png)
 
-> ⚠️ **Copyright**: this repo contains only code and self-written demo stories. Game scripts, images and music belong to their original creators. Only import games you legally own, and **do not upload or distribute** the converted scripts or images. galplay ships no unpacking/decryption tools and never runs game executables.
+> ⚠️ **Copyright**: this repo contains only code and self-written demo stories. Game scripts, images and music belong to their original creators. Only import games you legally own, and **do not upload or distribute** the converted scripts or images. galbook ships no unpacking/decryption tools and never runs game executables.
 
 ## Try it in 30 seconds
 
 ```bash
-git clone <this repo> galplay && cd galplay
-python3 -m galplay demo --books books          # installs the demos: fog-harbor (Chinese), fog-harbor-en (English)
-python3 -m galplay serve --books books --lang en   # http://127.0.0.1:8765/play/
+git clone <this repo> galbook && cd galbook
+python3 -m galbook demo --books books          # installs the demos: fog-harbor (Chinese), fog-harbor-en (English)
+python3 -m galbook serve --books books --lang en   # http://127.0.0.1:8765/play/
 ```
 
 An agent only needs HTTP GET:
@@ -59,12 +63,12 @@ python3 examples/party.py --book fog-harbor-en
 ## Connect your agent
 
 - **Any HTTP-capable agent**: the text API above. `/play/t?lang=en` can go straight into a system prompt.
-- **MCP (stdio)** (Claude Desktop, Cursor, Cline, dsh, …): `python3 -m galplay mcp --books books --data play-data --book fog-harbor-en --agent alice --lang en` — see [examples/mcp_config.example.json](examples/mcp_config.example.json)
+- **MCP (stdio)** (Claude Desktop, Cursor, Cline, dsh, …): `python3 -m galbook mcp --books books --data play-data --book fog-harbor-en --agent alice --lang en` — see [examples/mcp_config.example.json](examples/mcp_config.example.json)
 - **MCP (Streamable HTTP)**: `serve` exposes `POST /mcp?book=…&agent=…` — one server, many agents, works with tokens
 - **DeepSeek Harness**: [integrations/deepseek-harness](integrations/deepseek-harness/) (patch config, skill, a no-API-key self-test)
-- **Skill**: [.agents/skills/galplay/SKILL.md](.agents/skills/galplay/SKILL.md) — copy into `~/.agents/skills/` (dsh) or `.claude/skills/`
-- **OpenAI function calling**: `python3 -m galplay tools --format openai > tools.json`, execute with `galplay.tools.call_tool(...)`
-- **CLI**: `GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor-en GALPLAY_AGENT=alice python3 -m galplay do next n=20 --lang en` (the last line of output is the next command)
+- **Skill**: [.agents/skills/galbook/SKILL.md](.agents/skills/galbook/SKILL.md) — copy into `~/.agents/skills/` (dsh) or `.claude/skills/`
+- **OpenAI function calling**: `python3 -m galbook tools --format openai > tools.json`, execute with `galbook.tools.call_tool(...)`
+- **CLI**: `GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor-en GALPLAY_AGENT=alice python3 -m galbook do next n=20 --lang en` (the last line of output is the next command)
 
 Details: [docs/AGENTS.md](docs/AGENTS.md) (Chinese with English examples).
 
@@ -73,8 +77,8 @@ Details: [docs/AGENTS.md](docs/AGENTS.md) (Chinese with English examples).
 ## Import your own games
 
 ```bash
-python3 -m galplay detect path/to/extracted
-python3 -m galplay build --src path/to/extracted --out books/mygame/story --assets-dir books/mygame
+python3 -m galbook detect path/to/extracted
+python3 -m galbook build --src path/to/extracted --out books/mygame/story --assets-dir books/mygame
 ```
 
 | Engine | Support |
@@ -99,4 +103,4 @@ Tested on Python 3.9 / 3.12 / 3.13 (Linux) and Python 3.12 (mini PC) / 3.14 (Win
 
 ## License
 
-Code: MIT ([LICENSE](LICENSE)). Demo stories and art in `galplay/demo/`: CC0.
+Code: MIT ([LICENSE](LICENSE)). Demo stories and art in `galbook/demo/`: CC0.

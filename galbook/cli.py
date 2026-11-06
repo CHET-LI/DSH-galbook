@@ -1,6 +1,6 @@
 """命令行里玩（不用起服务）：
-  python3 -m galplay play <books目录> <存档目录> <书> <agent> <操作> [k=v ...]
-例：python3 -m galplay play books play-data lighthouse alice next n=30"""
+  python3 -m galbook play <books目录> <存档目录> <书> <agent> <操作> [k=v ...]
+例：python3 -m galbook play books play-data lighthouse alice next n=30"""
 import sys
 
 from .play import Library

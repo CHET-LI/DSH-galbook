@@ -1,9 +1,9 @@
 {
-  "name": "dsh-galbook",
+  "name": "galbook",
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "galgame plugin for DeepSeek Harness: an agent can read a script and pick choices by itself",
+  "description": "galbook: galgame plugin for DeepSeek Harness — an agent reads the script and picks choices by itself",
   "license": "MIT",
   "icon": "./icon.svg",
   "exports": {
@@ -12,7 +12,7 @@
   },
   "files": [
     "cordis.patch.yml",
-    "galplay/**",
+    "galbook/**",
     "locale/*.json",
     "icon.svg",
     "README.md",

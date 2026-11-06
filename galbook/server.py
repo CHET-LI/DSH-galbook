@@ -1,4 +1,4 @@
-"""独立服务：python3 -m galplay serve --books ./books --data ./play-data [--host 127.0.0.1] [--port 8765]
+"""独立服务：python3 -m galbook serve --books ./books --data ./play-data [--host 127.0.0.1] [--port 8765]
 
   /play/...            见 web.py（JSON / 纯文本 / 页面）
   /b/<书>/assets/...   书里的图片（只开放 assets/ 下面，剧本文件不外露，免得剧透/外泄）
@@ -59,7 +59,7 @@ class Auth(object):
 
 def make_handler(app, books_dir, auth, cors=False, quiet=False, lang="zh"):
     class H(BaseHTTPRequestHandler):
-        server_version = "galplay/" + VERSION
+        server_version = "galbook/" + VERSION
 
         def log_message(self, fmt, *a):
             if not quiet:
@@ -167,7 +167,7 @@ def make_handler(app, books_dir, auth, cors=False, quiet=False, lang="zh"):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="galplay serve", description="galplay 独立服务")
+    ap = argparse.ArgumentParser(prog="galbook serve", description="galbook 独立服务")
     ap.add_argument("--books", default="books")
     ap.add_argument("--data", default="play-data")
     ap.add_argument("--host", default=os.environ.get("GALPLAY_HOST", "127.0.0.1"))
@@ -183,7 +183,7 @@ def main(argv=None):
     app = App(a.books, a.data, default_lang=a.lang)
     srv = ThreadingHTTPServer((a.host, a.port), make_handler(app, a.books, Auth(a.token, tokens), a.cors, a.quiet, a.lang))
     srv.daemon_threads = True
-    print("galplay %s serving http://%s:%d/play/  books=%s data=%s auth=%s" % (
+    print("galbook %s serving http://%s:%d/play/  books=%s data=%s auth=%s" % (
         VERSION, a.host, a.port, os.path.abspath(a.books), os.path.abspath(a.data), "on" if (a.token or tokens) else "off"), flush=True)
     try:
         srv.serve_forever()

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>galplay · agents playing visual novels</title>
+<title>galbook · agents playing visual novels</title>
 <style>
 :root{--bg:#14161a;--fg:#e6e2da;--dim:#8d8a84;--acc:#e0b26a;--card:#1d2026;--line:#2b2f36}
 [hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.85 "Noto Sans CJK SC","PingFang SC","Hiragino Sans",sans-serif}
@@ -20,12 +20,12 @@ main{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:0;min-height
 .meta{color:var(--dim);font-size:13px}.err{color:#ff8a80}
 @media(max-width:720px){main{grid-template-columns:1fr}#side{border-right:0;border-bottom:1px solid var(--line);max-height:30vh}#stage{height:200px}}
 </style></head><body>
-<header><b>galplay</b><select id="book"></select>
+<header><b>galbook</b><select id="book"></select>
 <span class="meta">以</span><input id="agent" size="10" placeholder="名字" value="chet">
 <span class="meta">身份</span><button id="watch">只看</button><button class="pri" id="me">自己玩</button>
 <label class="meta"><input type="checkbox" id="img" checked> 图</label><span id="msg" class="meta"></span></header>
 <main><div id="side"><h3>正在玩的 agent</h3><div id="players"></div><h3 style="margin-top:14px">玩法（给 agent）</h3>
-<div class="meta">GET <code>/play/t/&lt;书&gt;/&lt;名字&gt;?do=next</code><br>完整说明：<a href="/play/t" style="color:var(--acc)">/play/t</a> · <a href="/play/t?lang=en" style="color:var(--acc)">English</a><br>MCP：<code>python3 -m galplay mcp</code></div></div>
+<div class="meta">GET <code>/play/t/&lt;书&gt;/&lt;名字&gt;?do=next</code><br>完整说明：<a href="/play/t" style="color:var(--acc)">/play/t</a> · <a href="/play/t?lang=en" style="color:var(--acc)">English</a><br>MCP：<code>python3 -m galbook mcp</code></div></div>
 <div><div id="stage"><div class="cg" id="cg" hidden></div></div>
 <div class="bar" id="ctl"><select id="o_h" title="H 场景"><option value="fold">H 折叠</option><option value="full">H 展开</option><option value="skip">H 跳过</option></select>
 <select id="o_mode" title="模式"><option value="normal">普通</option><option value="ironman">铁人</option></select>

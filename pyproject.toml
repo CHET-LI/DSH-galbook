@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "galplay"
+name = "galbook"
 version = "1.1.0"
 description = "Let AI agents play visual novels like humans: choices, saves, rewinds, many agents at once. HTTP text API, MCP, OpenAI tools."
 readme = "README.en.md"
@@ -14,10 +14,10 @@ keywords = ["visual-novel", "galgame", "agent", "llm", "mcp", "renpy", "kirikiri
 classifiers = ["License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Topic :: Games/Entertainment"]
 
 [project.scripts]
-galplay = "galplay.__main__:main"
+galbook = "galbook.__main__:main"
 
 [tool.setuptools]
-packages = ["galplay", "galplay.importers"]
+packages = ["galbook", "galbook.importers"]
 
 [tool.setuptools.package-data]
-galplay = ["static/*", "demo/*/*.gal", "demo/*/assets/*"]
+galbook = ["static/*", "demo/*/*.gal", "demo/*/assets/*"]

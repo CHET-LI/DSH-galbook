@@ -1,4 +1,4 @@
-"""QLIE（.s 剧本）→ galplay/1。
+"""QLIE（.s 剧本）→ galbook/1。
 
 在一部商业 QLIE 作品上逐条核对过的「AVGシステム」标准模板写法（同模板的作品很多）：
   台词   voice,名字＠别名,「台词」     （voice=none 表示无语音；名字＠后是真名，显示用＠前）
@@ -57,7 +57,7 @@ def _file_stem(ref):
 
 
 def translate_cond(c):
-    """QLIE 条件 → galplay 表达式；含引擎内部变量（ResultStr 等）返回 None。"""
+    """QLIE 条件 → galbook 表达式；含引擎内部变量（ResultStr 等）返回 None。"""
     c = c.strip()
     bad = []
 
@@ -167,7 +167,7 @@ class Importer(object):
             self._parse_file(stem)
         entry = self._build_start()
         routes = self._routes()
-        meta = {"format": "galplay/1", "title": "", "engine": "qlie", "importer": "galplay-qlie-1",
+        meta = {"format": "galbook/1", "title": "", "engine": "qlie", "importer": "galbook-qlie-1",
                 "entry": entry, "scenes": {sid: {"title": d["title"], "tags": d["tags"], "route": d["route"]}
                                            for sid, d in self.scenes.items()},
                 "routes": routes, "system_vars": sorted(self.system_vars),

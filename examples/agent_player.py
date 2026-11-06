@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""一个最小的「agent 玩家」：连 galplay 服务，按人设读剧情、做选择、写理由。只用标准库。
+"""一个最小的「agent 玩家」：连 galbook 服务，按人设读剧情、做选择、写理由。只用标准库。
 
   # 用大模型选（任何 OpenAI 兼容接口：OpenAI / DeepSeek / Qwen / Ollama / vLLM …）
   OPENAI_BASE_URL=https://api.openai.com/v1 OPENAI_API_KEY=sk-... MODEL=gpt-4o-mini \\

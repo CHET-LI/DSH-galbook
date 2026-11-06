@@ -1,4 +1,4 @@
-"""吉里吉里 KAG / TyranoScript（.ks）→ galplay/1。老游戏（KAG2/KAG3/KAGEX）和新的网页游戏（Tyrano）共用。
+"""吉里吉里 KAG / TyranoScript（.ks）→ galbook/1。老游戏（KAG2/KAG3/KAGEX）和新的网页游戏（Tyrano）共用。
 
 认的写法：
   *label|标题                        标签
@@ -91,7 +91,7 @@ class Importer(object):
         start.add("label", name="top")
         start.add("jump", scene=ent)
         self.scenes["__start__"] = start.data()
-        meta = {"format": "galplay/1", "title": "", "engine": "kag", "importer": "galplay-kag-1",
+        meta = {"format": "galbook/1", "title": "", "engine": "kag", "importer": "galbook-kag-1",
                 "entry": {"scene": "__start__", "label": "top"},
                 "scenes": {k: {"title": v["title"], "tags": v["tags"]} for k, v in self.scenes.items()},
                 "routes": [], "system_vars": sorted(self.system_vars),

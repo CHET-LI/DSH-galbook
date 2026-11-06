@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把 galplay 挂进 DeepSeek Harness（dsh）——一条命令，不用手改 YAML。
+"""把 galbook 挂进 DeepSeek Harness（dsh）——一条命令，不用手改 YAML。
 
     python dsh-plugin/install.py                  # 装到默认 profile（desktop）
     python dsh-plugin/install.py --dry-run        # 只打印要写进去的内容
@@ -10,7 +10,7 @@
 它会：
 1. 找到 dsh 的配置文件 <dsh-home>/profiles/<profile>/cordis.patch.yml；
 2. 备份成 .bak-时间戳；
-3. 追加一段 MCP 配置（stdio 方式，dsh 会自己拉起 python -m galplay mcp），路径按你这台机器自动填；
+3. 追加一段 MCP 配置（stdio 方式，dsh 会自己拉起 python -m galbook mcp），路径按你这台机器自动填；
 4. 打印重启和自测的方法。
 
 不改 dsh 本体，不动别的配置条目；重复执行不会写两遍。
@@ -23,16 +23,16 @@ import os
 import sys
 import tempfile
 
-MARK = "mcp-galplay"
-HEAD_COMMENT = "# >>> galplay (installed by dsh-plugin/install.py) >>>"
-TAIL_COMMENT = "# <<< galplay <<<"
+MARK = "mcp-galbook"
+HEAD_COMMENT = "# >>> galbook (installed by dsh-plugin/install.py) >>>"
+TAIL_COMMENT = "# <<< galbook <<<"
 
 BLOCK = """{head}
 - insert:
     - id: {mark}
       name: "@deepseek-ai/dsh-mcp-client"
       config:
-        serverName: galplay
+        serverName: galbook
         transport: stdio
         command: {command}
         args: {args}
@@ -75,7 +75,7 @@ def profiles(home: str):
 
 def build_block(args, repo: str) -> str:
     cmd = args.python or sys.executable
-    mars = ["-m", "galplay", "mcp",
+    mars = ["-m", "galbook", "mcp",
             "--books", os.path.abspath(args.books),
             "--data", os.path.abspath(args.data),
             "--book", args.book,
@@ -97,7 +97,7 @@ def strip_block(text: str) -> tuple[str, bool]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Install galplay MCP into DeepSeek Harness")
+    ap = argparse.ArgumentParser(description="Install galbook MCP into DeepSeek Harness")
     ap.add_argument("--home", help="dsh home（默认 ~/.dsh，也可以用环境变量 DSH_HOME 指定）")
     ap.add_argument("--profile", default="desktop", help="要写入的 profile（默认 desktop）")
     ap.add_argument("--books", default=None, help="剧本目录（默认 <仓库>/books）")
@@ -146,7 +146,7 @@ def main() -> int:
 
     if a.remove:
         if not existed:
-            print("没有找到 galplay 的配置块，什么都没改。")
+            print("没有找到 galbook 的配置块，什么都没改。")
             return 0
         _backup(target)
         with open(target, "w", encoding="utf-8") as f:
@@ -155,7 +155,7 @@ def main() -> int:
         return 0
 
     if MARK in text and not existed:
-        print("× 文件里已经有 mcp-galplay（可能是手动加的），为免冲突没有改动。")
+        print("× 文件里已经有 mcp-galbook（可能是手动加的），为免冲突没有改动。")
         return 3
 
     if text and not text.endswith("\n"):
@@ -170,10 +170,10 @@ def main() -> int:
     print("\n✓ 写入完成。")
     if not os.path.isdir(a.books) or not os.listdir(a.books):
         print("  ! 剧本目录还没有书，先装演示书（中文 + 英文两本）：")
-        print(f"    \"{a.python or sys.executable}\" -m galplay demo --books \"{a.books}\"")
+        print(f"    \"{a.python or sys.executable}\" -m galbook demo --books \"{a.books}\"")
     print("  1) 重启 DeepSeek Harness（配置只在启动时读）")
-    print("  2) 新建会话，问它：galplay 有哪些工具？应能看到 14 个")
-    print("  3) 想先验证不重启：手动给 python -m galplay mcp 发一条 initialize")
+    print("  2) 新建会话，问它：galbook 有哪些工具？应能看到 14 个")
+    print("  3) 想先验证不重启：手动给 python -m galbook mcp 发一条 initialize")
     print("  卸载：python dsh-plugin/install.py --remove")
     return 0
 

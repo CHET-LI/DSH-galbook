@@ -1,6 +1,6 @@
 # 接入 agent
 
-服务：`python3 -m galplay serve --books books --data play-data [--host 127.0.0.1 --port 8765 --lang zh|en --token X | --tokens f.json --cors]`
+服务：`python3 -m galbook serve --books books --data play-data [--host 127.0.0.1 --port 8765 --lang zh|en --token X | --tokens f.json --cors]`
 
 `<book>` 是 `books/` 下的目录名，`<agent>` 是玩家名（随便起，字母数字下划线最稳）。每个名字一份独立档案和存档，同时玩互不影响；同一个名字的并发请求会排队，不会写坏文件。
 
@@ -36,35 +36,35 @@
 ## 3. MCP
 
 ```bash
-python3 -m galplay mcp --books books --data play-data --book fog-harbor --agent alice [--lang en]
+python3 -m galbook mcp --books books --data play-data --book fog-harbor --agent alice [--lang en]
 ```
 
 stdio JSON-RPC，实现了 `initialize` / `ping` / `tools/list` / `tools/call`。`--book` / `--agent` 是默认值，工具参数里也能另外指定。Claude Desktop / Cursor 等的配置：[`examples/mcp_config.example.json`](../examples/mcp_config.example.json)（没 `pip install` 的话把 `cwd` 设到仓库根目录，或者设 `PYTHONPATH`）。
 
-工具：`galplay_books` `galplay_help` `galplay_status` `galplay_new` `galplay_next` `galplay_choose` `galplay_save` `galplay_load` `galplay_saves` `galplay_rewind` `galplay_log` `galplay_persona` `galplay_gallery` `galplay_profile`。返回都是纯文本（同文本接口）。
+工具：`galbook_books` `galbook_help` `galbook_status` `galbook_new` `galbook_next` `galbook_choose` `galbook_save` `galbook_load` `galbook_saves` `galbook_rewind` `galbook_log` `galbook_persona` `galbook_gallery` `galbook_profile`。返回都是纯文本（同文本接口）。
 
 ### MCP over HTTP
 
-`python3 -m galplay serve` 同时提供 `POST /mcp`（Streamable HTTP，只回 JSON，不开服务端推送流；`GET /mcp` 返回 405）。默认书和名字用 `?book=…&agent=…` 或请求头 `X-Galplay-Agent`。开了 `--tokens` 时，令牌绑定的名字优先，模型在参数里写别的名字会被拒绝。
+`python3 -m galbook serve` 同时提供 `POST /mcp`（Streamable HTTP，只回 JSON，不开服务端推送流；`GET /mcp` 返回 405）。默认书和名字用 `?book=…&agent=…` 或请求头 `X-Galplay-Agent`。开了 `--tokens` 时，令牌绑定的名字优先，模型在参数里写别的名字会被拒绝。
 
 ## 4. CLI（给只有 shell 的 agent）
 
 ```bash
 export GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice
-python3 -m galplay do help | books | status | new hints=1 | next n=20 | choose i=2 reason="…" | save slot=x | load slot=x | rewind | log | persona text="…" | gallery | profile
+python3 -m galbook do help | books | status | new hints=1 | next n=20 | choose i=2 reason="…" | save slot=x | load slot=x | rewind | log | persona text="…" | gallery | profile
 ```
 
 参数都是 `k=v`；`--book/--agent/--books/--data/--lang` 可以覆盖环境变量。输出和文本接口一样，最后一行是下一步要跑的命令。出错时退出码 1。
 
 ## 5. 技能（Skill）
 
-[`.agents/skills/galplay/SKILL.md`](../.agents/skills/galplay/SKILL.md)：告诉模型怎么像人一样玩、先用 MCP 再用 CLI、不要偷看剧本文件。dsh 会自动扫描 `<项目>/.agents/skills`、`~/.agents/skills`、`~/.dsh/skills`；Claude Code 用 `.claude/skills/`。DeepSeek Harness 的完整配置见 [integrations/deepseek-harness](../integrations/deepseek-harness/)。
+[`.agents/skills/galbook/SKILL.md`](../.agents/skills/galbook/SKILL.md)：告诉模型怎么像人一样玩、先用 MCP 再用 CLI、不要偷看剧本文件。dsh 会自动扫描 `<项目>/.agents/skills`、`~/.agents/skills`、`~/.dsh/skills`；Claude Code 用 `.claude/skills/`。DeepSeek Harness 的完整配置见 [integrations/deepseek-harness](../integrations/deepseek-harness/)。
 
 ## 6. OpenAI function calling
 
 ```python
-from galplay.play import Library
-from galplay import tools
+from galbook.play import Library
+from galbook import tools
 lib = Library("books", "play-data")
 TOOLS = tools.openai_tools()                 # 传给 chat.completions 的 tools=
 # 模型返回 tool_call 后：
@@ -72,7 +72,7 @@ text = tools.call_tool(lib, call.function.name, json.loads(call.function.argumen
                        default_book="fog-harbor", default_agent="alice", lang="zh")
 ```
 
-或者 `python3 -m galplay tools --format openai > tools.json`。
+或者 `python3 -m galbook tools --format openai > tools.json`。
 
 ## 7. 令牌（公开部署时）
 

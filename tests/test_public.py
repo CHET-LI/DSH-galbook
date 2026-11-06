@@ -16,16 +16,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 SAMPLES = os.path.join(HERE, "samples")
-DEMO = os.path.join(ROOT, "galplay", "demo")
+DEMO = os.path.join(ROOT, "galbook", "demo")
 
-from galplay import importers  # noqa: E402
-from galplay.importers import detect, get  # noqa: E402
-from galplay.importers.common import Assets  # noqa: E402
-from galplay.ir import validate, save_story  # noqa: E402
-from galplay.play import Library  # noqa: E402
-from galplay.engine import PlayError  # noqa: E402
-from galplay.web import render_text  # noqa: E402
-from galplay import tools, mcp_server  # noqa: E402
+from galbook import importers  # noqa: E402
+from galbook.importers import detect, get  # noqa: E402
+from galbook.importers.common import Assets  # noqa: E402
+from galbook.ir import validate, save_story  # noqa: E402
+from galbook.play import Library  # noqa: E402
+from galbook.engine import PlayError  # noqa: E402
+from galbook.web import render_text  # noqa: E402
+from galbook import tools, mcp_server  # noqa: E402
 
 
 def wr(p, text):
@@ -115,7 +115,7 @@ class TestImportersPublic(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         try:
             out = os.path.join(tmp, "b", "story")
-            r = subprocess.run([sys.executable, "-m", "galplay", "build", "--src", os.path.join(SAMPLES, "myfmt"), "--out", out,
+            r = subprocess.run([sys.executable, "-m", "galbook", "build", "--src", os.path.join(SAMPLES, "myfmt"), "--out", out,
                                 "--plugin", os.path.join(HERE, "plugins", "myfmt.py")], cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
             L = Library(os.path.join(tmp), os.path.join(tmp, "data"))
@@ -227,16 +227,16 @@ class TestCLI(Base):
         e = dict(os.environ, GALPLAY_BOOKS=self.books, GALPLAY_DATA=os.path.join(self.tmp, "data"), GALPLAY_BOOK="fog",
                  GALPLAY_AGENT="cli", PYTHONIOENCODING="utf-8")
         e.update(env)
-        r = subprocess.run([sys.executable, "-m", "galplay", "do"] + list(args), cwd=ROOT, env=e, capture_output=True)
+        r = subprocess.run([sys.executable, "-m", "galbook", "do"] + list(args), cwd=ROOT, env=e, capture_output=True)
         return r.returncode, r.stdout.decode("utf-8")
 
     def test_do(self):
         self.assertIn("fog-en", self.run_do("books")[1])
         rc, out = self.run_do("new", "hints=1")
         self.assertEqual(rc, 0)
-        self.assertIn("galplay do next", out)                          # 下一步提示是 CLI 写法
+        self.assertIn("galbook do next", out)                          # 下一步提示是 CLI 写法
         rc, out = self.run_do("next", "n=50")
-        self.assertIn("galplay do choose i=", out)
+        self.assertIn("galbook do choose i=", out)
         rc, out = self.run_do("choose", "i=2", "reason=测试")
         self.assertIn("2/3", out)
         rc, out = self.run_do("choose", "i=2")
@@ -253,24 +253,24 @@ class TestTools(Base):
         m = tools.mcp_tools()
         self.assertEqual(len(o), len(m))
         names = {t["function"]["name"] for t in o}
-        for n in ("galplay_next", "galplay_choose", "galplay_save", "galplay_load", "galplay_rewind"):
+        for n in ("galbook_next", "galbook_choose", "galbook_save", "galbook_load", "galbook_rewind"):
             self.assertIn(n, names)
         json.dumps(o)
         json.dumps(m)
 
     def test_call_tool(self):
-        txt = tools.call_tool(self.L, "galplay_new", {"hints": True}, "fog", "t", "zh")
+        txt = tools.call_tool(self.L, "galbook_new", {"hints": True}, "fog", "t", "zh")
         self.assertIn("新游戏", txt)
-        txt = tools.call_tool(self.L, "galplay_next", {"n": 50}, "fog", "t", "zh")
+        txt = tools.call_tool(self.L, "galbook_next", {"n": 50}, "fog", "t", "zh")
         self.assertIn("选项", txt)
 
     def test_mcp_stdio(self):
         reqs = [{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05"}},
                 {"jsonrpc": "2.0", "method": "notifications/initialized"},
                 {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
-                {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "galplay_new", "arguments": {}}},
-                {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "galplay_next", "arguments": {"n": 50}}},
-                {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "galplay_choose", "arguments": {"i": 99}}}]
+                {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "galbook_new", "arguments": {}}},
+                {"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "galbook_next", "arguments": {"n": 50}}},
+                {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "galbook_choose", "arguments": {"i": 99}}}]
         fin = io.StringIO("".join(json.dumps(r) + "\n" for r in reqs))
         fout = io.StringIO()
         mcp_server.serve(self.L, "fog", "m", "zh", fin, fout)
@@ -299,7 +299,7 @@ class TestServerAuth(unittest.TestCase):
         tok = os.path.join(cls.tmp, "tokens.json")
         wr(tok, json.dumps({"alice-key": "alice", "admin-key": "*"}))
         cls.port = free_port()
-        cls.proc = subprocess.Popen([sys.executable, "-m", "galplay", "serve", "--books", books, "--data",
+        cls.proc = subprocess.Popen([sys.executable, "-m", "galbook", "serve", "--books", books, "--data",
                                      os.path.join(cls.tmp, "data"), "--port", str(cls.port), "--tokens", tok, "--quiet"],
                                     cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(50):
@@ -341,9 +341,9 @@ class TestServerAuth(unittest.TestCase):
         self.assertEqual(self.mcp(init)[0], 401)
         code, r = self.mcp(init, "alice-key")
         self.assertEqual(code, 200)
-        self.assertEqual(r["result"]["serverInfo"]["name"], "galplay")
+        self.assertEqual(r["result"]["serverInfo"]["name"], "galbook")
         self.assertEqual(self.mcp({"jsonrpc": "2.0", "method": "notifications/initialized"}, "alice-key")[0], 202)
-        call = {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "galplay_new", "arguments": {}}}
+        call = {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "galbook_new", "arguments": {}}}
         code, r = self.mcp(call, "alice-key", "?book=fog&agent=mallory")      # 令牌绑定 alice：URL 里的名字不算
         self.assertFalse(r["result"]["isError"], r)
         self.assertTrue(os.path.isdir(os.path.join(self.tmp, "data", "fog", "alice")))

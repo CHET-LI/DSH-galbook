@@ -1,12 +1,12 @@
 """MCP 服务（stdio，JSON-RPC 2.0，一行一条）：让任何支持 MCP 的 agent 直接玩。
 
-  python3 -m galplay mcp --books ./books --data ./play-data [--book 默认书] [--agent 默认名] [--lang zh|en]
+  python3 -m galbook mcp --books ./books --data ./play-data [--book 默认书] [--agent 默认名] [--lang zh|en]
 
 在 MCP 客户端里配置（示例）：
-  {"mcpServers": {"galplay": {"command": "python3",
-     "args": ["-m", "galplay", "mcp", "--books", "/path/books", "--data", "/path/play-data", "--agent", "alice"]}}}
+  {"mcpServers": {"galbook": {"command": "python3",
+     "args": ["-m", "galbook", "mcp", "--books", "/path/books", "--data", "/path/play-data", "--agent", "alice"]}}}
 多个 agent 可以各起一个 MCP 进程（不同 --agent），共用同一个 --data 目录；存储层有文件锁，互不干扰。
-也可以不起进程：python3 -m galplay serve 自带 Streamable HTTP 的 MCP 端点 POST /mcp?book=…&agent=…（见 server.py）。"""
+也可以不起进程：python3 -m galbook serve 自带 Streamable HTTP 的 MCP 端点 POST /mcp?book=…&agent=…（见 server.py）。"""
 import argparse
 import json
 import sys
@@ -31,9 +31,9 @@ def handle(lib, req, book=None, agent=None, lang="zh", force_agent=None):
     try:
         if method == "initialize":
             res = {"protocolVersion": params.get("protocolVersion") or PROTO, "capabilities": {"tools": {}},
-                   "serverInfo": {"name": "galplay", "version": VERSION},
-                   "instructions": "Play visual novels like a human: galplay_help first, set galplay_persona, "
-                                   "then galplay_new / galplay_next / galplay_choose (always give a reason)."}
+                   "serverInfo": {"name": "galbook", "version": VERSION},
+                   "instructions": "Play visual novels like a human: galbook_help first, set galbook_persona, "
+                                   "then galbook_new / galbook_next / galbook_choose (always give a reason)."}
         elif method == "ping":
             res = {}
         elif method == "tools/list":
@@ -80,7 +80,7 @@ def serve(lib, book=None, agent=None, lang="zh", fin=None, fout=None):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="galplay mcp")
+    ap = argparse.ArgumentParser(prog="galbook mcp")
     ap.add_argument("--books", default="books")
     ap.add_argument("--data", default="play-data")
     ap.add_argument("--book")

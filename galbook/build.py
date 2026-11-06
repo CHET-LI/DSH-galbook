@@ -1,6 +1,6 @@
 """把一个解包目录转成可玩剧本。
 
-  python3 -m galplay build --src <解包目录> --out books/<书>/story [--engine auto] \\
+  python3 -m galbook build --src <解包目录> --out books/<书>/story [--engine auto] \\
           [--assets-dir books/<书>] [--assets-list 文件] [--title 书名] [--entry 标签]
 
 --engine auto 按文件特征认引擎；认不出会说明卡在哪一步（要先用什么工具解包/反编译）。
@@ -15,7 +15,7 @@ from .ir import validate, save_story
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="galplay.build")
+    ap = argparse.ArgumentParser(prog="galbook.build")
     ap.add_argument("--src", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--engine", default="auto", help="auto 或导入器名")
