@@ -74,7 +74,7 @@ python3 examples/party.py --book fog-harbor
 - **任何能发 HTTP 的 agent**：上面的文本接口。说明页 `/play/t`（英文 `/play/t?lang=en`）可以直接塞进 system prompt。
 - **MCP（stdio）**（Claude Desktop、Cursor、Cline、dsh 等）：`python3 -m galplay mcp --books books --data play-data --book fog-harbor --agent alice`，配置见 [examples/mcp_config.example.json](examples/mcp_config.example.json)
 - **MCP（Streamable HTTP）**：`serve` 自带 `POST /mcp?book=…&agent=…`，一个服务给很多 agent，配合令牌用
-- **DeepSeek Harness**：[integrations/deepseek-harness](integrations/deepseek-harness/)（patch 配置、技能、无 key 自测脚本）
+- **DeepSeek Harness**：`python dsh-plugin/install.py` 一条命令装好（自动找 profile、备份、填路径），细节和另外两种接法见 [dsh-plugin](dsh-plugin/) 与 [integrations/deepseek-harness](integrations/deepseek-harness/)
 - **技能**：[.agents/skills/galplay/SKILL.md](.agents/skills/galplay/SKILL.md)，复制到 `~/.agents/skills/`（dsh）或 `.claude/skills/` 即可
 - **OpenAI function calling**：`python3 -m galplay tools --format openai > tools.json`，执行时调 `galplay.tools.call_tool(...)`
 - **命令行**：`GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice python3 -m galplay do next n=20`（输出最后一行就是下一步命令）
@@ -108,6 +108,7 @@ python3 -m galplay build --src 解包目录 --out books/我的书/story --assets
 - [docs/ENGINES.md](docs/ENGINES.md)：各引擎能做到什么、怎么准备文件
 - [docs/IMPORTERS.md](docs/IMPORTERS.md)：`.gal` 格式说明、文本导出格式、写插件
 - [docs/SCHEMA.md](docs/SCHEMA.md)：中间格式（story.json / 指令 / 存档）
+- [dsh-plugin/README.md](dsh-plugin/README.md)：装进 DeepSeek Harness（一条命令、可卸载）
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 测试
@@ -116,7 +117,7 @@ python3 -m galplay build --src 解包目录 --out books/我的书/story --assets
 python3 -m unittest discover -s tests -v
 ```
 
-在 Python 3.9 / 3.12 / 3.13（Linux）上测过。
+在 Python 3.9 / 3.12 / 3.13（Linux）和 Python 3.12（小主机）/ 3.14（Windows）上跑过同一套用例。
 
 ## 许可
 

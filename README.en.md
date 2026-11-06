@@ -95,7 +95,7 @@ Archives (`.xp3`, `.pack`, `.rpa`, …) must be extracted first with tools such 
 python3 -m unittest discover -s tests -v
 ```
 
-Tested on Python 3.9 / 3.12 / 3.13 (Linux).
+Tested on Python 3.9 / 3.12 / 3.13 (Linux) and Python 3.12 (mini PC) / 3.14 (Windows) with the same suite.
 
 ## License
 
