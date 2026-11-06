@@ -33,7 +33,8 @@ class Library(object):
                 continue
             out.append({"slug": slug, "title": st.title or slug, "mode": st.mode, "engine": st.meta.get("engine", ""),
                         "scenes": len(st.scenes), "routes": [r.get("title") for r in st.routes],
-                        "players": len(self.store.agents(slug))})
+                        "players": len(self.store.agents(slug)),
+                        "problems": st.problems[:20]})
         return out
 
     def story(self, slug):
@@ -75,6 +76,10 @@ class Library(object):
 
     def _a_next(self, story, S, n=20, skip_read=False, **_):
         st = self._need_run(S)
+        if st.get("ended"):
+            # 已经结束：幂等返回，不再吐一遍同样的结尾（灵犀实测反馈）
+            return {"ok": True, "no_new": True, "msg": "已经结束了，没有新内容（想换条路：rewind / load / new）",
+                    "state": {"lines": [], "ended": st["ended"]}}
         n = max(1, min(int(n or 20), 200))
         before_end = st.get("ended")
         r = engine.advance(story, st, S.profile["s"], S.profile["seen"], n=n, skip_read=bool(skip_read))

@@ -322,3 +322,62 @@ class TestHTTPConcurrent(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDeadEnd(unittest.TestCase):
+    """场景没有出口时：校验能查出来、运行时报能指到场景、连点 next 幂等（灵犀实测反馈）。"""
+
+    def _book(self):
+        meta = {"format": "galbook/1", "title": "缺出口样本", "engine": "test", "mode": "branch",
+                "entry": {"scene": "a"}, "scenes": {}, "routes": []}
+        scenes = {"a": {"title": "第一幕", "ops": [{"op": "say", "who": "甲", "text": "只有一句，然后没了"}]}}
+        return meta, scenes
+
+    def test_validate_flags_missing_exit(self):
+        meta, scenes = self._book()
+        probs = validate(meta, scenes)
+        self.assertTrue(any("没有出口" in p for p in probs), probs)
+
+    def test_story_problems_lists_scene(self):
+        meta, scenes = self._book()
+        st = story_from_dict(meta, scenes)
+        self.assertTrue(st.problems, "应该报出问题")
+        self.assertIn("第一幕", st.problems[0])
+
+    def test_ended_names_scene_and_marks_dead_end(self):
+        meta, scenes = self._book()
+        st = story_from_dict(meta, scenes)
+        s = engine.new_state(st)
+        r = engine.advance(st, s, {}, {})
+        e = r["ended"]
+        self.assertTrue(e.get("dead_end"))
+        self.assertEqual(e.get("scene"), "a")
+        self.assertIn("缺出口", e["name"])
+
+    def test_next_after_end_is_idempotent(self):
+        meta, scenes = self._book()
+        tmp = tempfile.mkdtemp()
+        try:
+            save_story(os.path.join(tmp, "books", "t", "story"), meta, scenes)
+            lib = Library(os.path.join(tmp, "books"), os.path.join(tmp, "data"))
+            lib.act("t", "alice", "new")
+            r1 = lib.act("t", "alice", "next", n=20)
+            r2 = lib.act("t", "alice", "next", n=20)
+            self.assertTrue(r1["state"].get("ended"))
+            self.assertTrue(r2.get("no_new"))
+            self.assertEqual(r2["state"]["lines"], [])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_render_no_new_single_line(self):
+        from galbook.web import render_text
+        out = render_text({"ok": True, "no_new": True, "msg": "已经结束了，没有新内容",
+                           "state": {"lines": [], "ended": {"kind": "stop", "name": "x"}}},
+                          "next", False, "t", "alice", "zh")
+        self.assertEqual(len([x for x in out.splitlines() if x.strip()]), 1, out)
+
+    def test_normal_book_has_no_problems(self):
+        st = story_from_dict({"format": "galbook/1", "entry": {"scene": "a"}, "scenes": {}},
+                             {"a": {"title": "ok", "ops": [{"op": "say", "text": "hi"},
+                                                           {"op": "end", "kind": "ending", "name": "完"}]}})
+        self.assertEqual(st.problems, [])

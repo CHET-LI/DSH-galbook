@@ -119,7 +119,8 @@ def advance(story, state, sysv, seen, n=20, skip_read=False):
             if state["stack"]:
                 state["scene"], state["pc"] = state["stack"].pop()
                 continue
-            state["ended"] = {"kind": "stop", "name": "场景 %s 走到底且没有跳转" % sc.title}
+            state["ended"] = {"kind": "stop", "dead_end": True, "scene": sc.id,
+                              "name": "场景 %s「%s」走到底且没有跳转（这个场景缺出口）" % (sc.id, sc.title)}
             break
         op = sc.ops[pc]
         state["pc"] = pc + 1

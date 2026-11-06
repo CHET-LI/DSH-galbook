@@ -31,6 +31,7 @@ import threading
 FORMAT = "galbook/1"
 OPS = {"say", "bg", "cg", "sprite", "sprites_clear", "bgm", "label", "choice", "jump", "call", "ret",
        "set", "event", "end"}
+EXITS = ("choice", "jump", "call", "ret", "end")
 
 
 class StoryError(ValueError):
@@ -115,6 +116,17 @@ class Story(object):
     def endings_total(self):
         return self._count()[1]
 
+    @property
+    def problems(self):
+        """加载后能查出来的结构问题（没出口的场景等）；空列表 = 没发现。"""
+        if not hasattr(self, "_problems"):
+            probs = []
+            for sid, sc in self.scenes.items():
+                if not any(op.get("op") in EXITS for op in sc.ops):
+                    probs.append("%s（%s）: 没有出口（缺 choice / jump / end / ret）" % (sid, sc.title))
+            self._problems = probs
+        return self._problems
+
     def resolve(self, scene, label, here=None):
         sid = scene or here
         sc = self.scene(sid)
@@ -140,6 +152,11 @@ def validate(meta, scene_datas):
             probs.append("%s: 场景 %r 没有标签 %r" % (where, sc, lb))
     e = meta.get("entry") or {}
     chk("entry", e.get("scene"), e.get("label"))
+    for sid, d in scene_datas.items():
+        ops_ = d.get("ops") or []
+        if not any(op.get("op") in EXITS for op in ops_):
+            probs.append("%s（%s）: 场景没有出口——没有 choice / jump / end / ret，"
+                         "玩家会卡在最后一句（多半是转换时丢了控制流）" % (sid, d.get("title") or sid))
     for sid, d in scene_datas.items():
         for i, op in enumerate(d.get("ops", [])):
             k = op.get("op")

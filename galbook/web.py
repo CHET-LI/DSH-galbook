@@ -215,6 +215,8 @@ def render_text(r, do, img, book, agent, lang="zh"):
     st = r.get("state")
     if r.get("msg"):
         L.append(msg(lang, r["msg"]))
+    if r.get("no_new"):
+        return "\n".join(L) + "\n"
     if do == "choose":
         c = r["chosen"]
         L.append(t(lang, "you_chose", text=c["text"], i=c["i"], of=c.get("of") or "?"))
