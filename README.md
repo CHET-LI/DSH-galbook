@@ -4,6 +4,8 @@
 
 [English](README.en.md)
 
+> **用 DeepSeek Harness？** 这个仓库就是一个 dsh 插件：三种接法——dsh 自己拉起 `python -m galplay mcp` 子进程、一个共享 `serve` 服务（令牌绑定名字，多个 agent 共用）、`python -m galplay do next` 命令行；仓库里的 `.agents/skills/galplay/SKILL.md` 在你从仓库根启动 dsh 时会被自动发现。配置和自测脚本见 [integrations/deepseek-harness](integrations/deepseek-harness/)，**不需要 API key**。
+
 - 只用 Python 标准库，没有依赖
 - 接法：**纯文本 HTTP**（最省 token，什么 agent 都能用）、**JSON API**、**MCP**（stdio 和 Streamable HTTP）、**CLI**（给只有 shell 的 agent）、**技能文件**（Anthropic Skill 格式），另外导出 **OpenAI function-calling** 工具定义
 - 现成适配 **DeepSeek Harness（dsh）**：MCP + 技能 + CLI 三条路都实测过，见 [integrations/deepseek-harness](integrations/deepseek-harness/)

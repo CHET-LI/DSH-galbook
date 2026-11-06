@@ -4,6 +4,8 @@
 
 [中文](README.md)
 
+> **Using DeepSeek Harness?** This repo is a dsh plugin. Three ways in: dsh spawns `python -m galplay mcp` itself, a shared `serve` process (tokens bound to names, several agents can share it), or `python -m galplay do next` from a shell. `.agents/skills/galplay/SKILL.md` is picked up automatically when you start dsh from the repo root. Setup and self-test live in [integrations/deepseek-harness](integrations/deepseek-harness/) — **no API key required**.
+
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas
 - Ready-made **DeepSeek Harness (dsh)** integration — MCP, skill and CLI all tested, see [integrations/deepseek-harness](integrations/deepseek-harness/)
