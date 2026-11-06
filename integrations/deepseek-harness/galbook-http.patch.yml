@@ -8,4 +8,4 @@
         transport: streamable-http
         url: http://127.0.0.1:8765/mcp?book=fog-harbor&agent=dsh-agent
         headers:
-          Authorization: !!js '`Bearer ${process.env.GALPLAY_TOKEN || ""}`'
+          Authorization: !!js '`Bearer ${process.env.GALBOOK_TOKEN || ""}`'

@@ -151,7 +151,7 @@ class TestLibrary(unittest.TestCase):
         self.books = os.path.join(self.tmp, "books")
         meta, scenes = build("renpy")
         save_story(os.path.join(self.books, "light", "story"), meta, scenes)
-        demo = os.environ.get("GALPLAY_DEMO_BOOK", "")   # 可选：一本旧版 book.json + chNNN.json 书稿
+        demo = os.environ.get("GALBOOK_DEMO_BOOK", "")   # 可选：一本旧版 book.json + chNNN.json 书稿
         if demo and os.path.isdir(demo):
             shutil.copytree(demo, os.path.join(self.books, "demo"))
         self.lib = Library(self.books, os.path.join(self.tmp, "data"))
@@ -201,7 +201,7 @@ class TestLibrary(unittest.TestCase):
 
     def test_legacy_book(self):
         if not os.path.isdir(os.path.join(self.books, "demo")):
-            self.skipTest("没设 GALPLAY_DEMO_BOOK")
+            self.skipTest("没设 GALBOOK_DEMO_BOOK")
         L = self.lib
         L.act("demo", "r", "new")
         for _ in range(100):

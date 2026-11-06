@@ -1,30 +1,30 @@
 # dsh bundle: 把 galbook 的 MCP 服务挂进当前 profile。
-# 路径优先读环境变量 GALPLAY_HOME；没设就用安装后的包目录（<profile>/node_modules/dsh-galbook）。
-# python 想指定别的解释器：设 GALPLAY_PYTHON。
+# 路径优先读环境变量 GALBOOK_HOME；没设就用安装后的包目录（<profile>/node_modules/dsh-galbook）。
+# python 想指定别的解释器：设 GALBOOK_PYTHON。
 - insert:
     - id: mcp-galbook
       name: '@deepseek-ai/dsh-mcp-client'
       config:
         serverName: galbook
         transport: stdio
-        command: !!js "process.env.GALPLAY_PYTHON || (process.platform === 'win32' ? 'python' : 'python3')"
+        command: !!js "process.env.GALBOOK_PYTHON || (process.platform === 'win32' ? 'python' : 'python3')"
         args:
           - '-m'
           - 'galbook'
           - 'mcp'
           - '--books'
-          - !!js "(process.env.GALPLAY_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')) + '/books'"
+          - !!js "(process.env.GALBOOK_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')) + '/books'"
           - '--data'
-          - !!js "(process.env.GALPLAY_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')) + '/play-data'"
+          - !!js "(process.env.GALBOOK_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')) + '/play-data'"
           - '--book'
           - 'fog-harbor'
           - '--agent'
           - 'dsh-agent'
           - '--lang'
           - 'zh'
-        cwd: !!js "process.env.GALPLAY_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')"
+        cwd: !!js "process.env.GALBOOK_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')"
         env:
-          PYTHONPATH: !!js "process.env.GALPLAY_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')"
+          PYTHONPATH: !!js "process.env.GALBOOK_HOME || ((process.env.DSH_PROFILE_DIR || process.cwd()) + '/node_modules/dsh-galbook')"
           PYTHONIOENCODING: utf-8
         failOnStartupError: false
         toolCallTimeoutMs: 60000

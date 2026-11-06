@@ -75,7 +75,7 @@ python3 examples/party.py --book fog-harbor-en
 - **DeepSeek Harness**: [integrations/deepseek-harness](integrations/deepseek-harness/) (patch config, skill, a no-API-key self-test)
 - **Skill**: [.agents/skills/galbook/SKILL.md](.agents/skills/galbook/SKILL.md) — copy into `~/.agents/skills/` (dsh) or `.claude/skills/`
 - **OpenAI function calling**: `python3 -m galbook tools --format openai > tools.json`, execute with `galbook.tools.call_tool(...)`
-- **CLI**: `GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor-en GALPLAY_AGENT=alice python3 -m galbook do next n=20 --lang en` (the last line of output is the next command)
+- **CLI**: `GALBOOK_BOOKS=books GALBOOK_DATA=play-data GALBOOK_BOOK=fog-harbor-en GALBOOK_AGENT=alice python3 -m galbook do next n=20 --lang en` (the last line of output is the next command)
 
 Details: [docs/AGENTS.md](docs/AGENTS.md) (Chinese with English examples).
 

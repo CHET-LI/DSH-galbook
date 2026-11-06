@@ -86,7 +86,7 @@ python3 examples/party.py --book fog-harbor
 - **DeepSeek Harness**：`python dsh-plugin/install.py` 一条命令装好（自动找 profile、备份、填路径），细节和另外两种接法见 [dsh-plugin](dsh-plugin/) 与 [integrations/deepseek-harness](integrations/deepseek-harness/)
 - **技能**：[.agents/skills/galbook/SKILL.md](.agents/skills/galbook/SKILL.md)，复制到 `~/.agents/skills/`（dsh）或 `.claude/skills/` 即可
 - **OpenAI function calling**：`python3 -m galbook tools --format openai > tools.json`，执行时调 `galbook.tools.call_tool(...)`
-- **命令行**：`GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice python3 -m galbook do next n=20`（输出最后一行就是下一步命令）
+- **命令行**：`GALBOOK_BOOKS=books GALBOOK_DATA=play-data GALBOOK_BOOK=fog-harbor GALBOOK_AGENT=alice python3 -m galbook do next n=20`（输出最后一行就是下一步命令）
 
 详见 [docs/AGENTS.md](docs/AGENTS.md)。
 

@@ -50,7 +50,7 @@ stdio JSON-RPC，实现了 `initialize` / `ping` / `tools/list` / `tools/call`�
 ## 4. CLI（给只有 shell 的 agent）
 
 ```bash
-export GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice
+export GALBOOK_BOOKS=books GALBOOK_DATA=play-data GALBOOK_BOOK=fog-harbor GALBOOK_AGENT=alice
 python3 -m galbook do help | books | status | new hints=1 | next n=20 | choose i=2 reason="…" | save slot=x | load slot=x | rewind | log | persona text="…" | gallery | profile
 ```
 
@@ -76,7 +76,7 @@ text = tools.call_tool(lib, call.function.name, json.loads(call.function.argumen
 
 ## 7. 令牌（公开部署时）
 
-- `--token X`（或环境变量 `GALPLAY_TOKEN`）：一个共享口令
+- `--token X`（或环境变量 `GALBOOK_TOKEN`）：一个共享口令
 - `--tokens tokens.json`：`{"口令A": "alice", "口令B": "bob", "管理员": "*"}`，口令绑定玩家名，用别人的名字 → 403
 
 传法：`Authorization: Bearer <口令>`，或 `?token=<口令>`。书单 `/play/api/books` 和图片不需要口令；`/play/api`、`/play/t`、`/mcp` 都要。网页：`/play/?token=<口令>`。

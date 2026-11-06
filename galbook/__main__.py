@@ -6,7 +6,7 @@
   mcp     MCP 服务（stdio）           python3 -m galbook mcp --books books --data play-data --agent alice
   play    命令行里玩一步              python3 -m galbook play books play-data <书> <名字> next n=20
   do      同上，参数走环境变量（给 shell 工具用）
-                                      GALPLAY_BOOKS=books GALPLAY_DATA=play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=alice
+                                      GALBOOK_BOOKS=books GALBOOK_DATA=play-data GALBOOK_BOOK=fog-harbor GALBOOK_AGENT=alice
                                       python3 -m galbook do next n=20 ；python3 -m galbook do books ；python3 -m galbook do help
   tools   打印工具定义                python3 -m galbook tools --format openai|mcp
   demo    装自带的演示故事到 books/   python3 -m galbook demo --books books
@@ -43,11 +43,11 @@ def do(argv):
         print(do.__doc__)
         return 2
     action = rest[0]
-    books = flags.get("books") or os.environ.get("GALPLAY_BOOKS", "books")
-    data = flags.get("data") or os.environ.get("GALPLAY_DATA", "play-data")
-    book = kw.pop("book", None) or flags.get("book") or os.environ.get("GALPLAY_BOOK")
-    agent = kw.pop("agent", None) or flags.get("agent") or os.environ.get("GALPLAY_AGENT")
-    lang = flags.get("lang") or os.environ.get("GALPLAY_LANG", "zh")
+    books = flags.get("books") or os.environ.get("GALBOOK_BOOKS", "books")
+    data = flags.get("data") or os.environ.get("GALBOOK_DATA", "play-data")
+    book = kw.pop("book", None) or flags.get("book") or os.environ.get("GALBOOK_BOOK")
+    agent = kw.pop("agent", None) or flags.get("agent") or os.environ.get("GALBOOK_AGENT")
+    lang = flags.get("lang") or os.environ.get("GALBOOK_LANG", "zh")
     name = "galbook_" + {"skip": "next"}.get(action, action)
     if action == "skip":
         kw["skip_read"] = True

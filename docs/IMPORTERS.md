@@ -58,7 +58,7 @@ def build(src, assets=None, **opts):  # 必须：返回 (meta, scenes)
 
 ```bash
 python3 -m galbook build --plugin myengine.py --src 解包目录 --out books/x/story
-GALPLAY_PLUGINS=/path/to/plugins python3 -m galbook detect 解包目录    # 目录或文件，多个用 : 分隔（Windows 用 ;）
+GALBOOK_PLUGINS=/path/to/plugins python3 -m galbook detect 解包目录    # 目录或文件，多个用 : 分隔（Windows 用 ;）
 ```
 
 插件比内置导入器先识别。`build` 会跑同一套校验，所以插件输出错了也会被指出来。写好了欢迎 PR 进 `galbook/importers/`。

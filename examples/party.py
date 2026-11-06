@@ -17,8 +17,8 @@ CAST = [("brave_rin", "胆子大 好奇 爱冒险"), ("gentle_mio", "温柔 体�
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--server", default=os.environ.get("GALPLAY_SERVER", "http://127.0.0.1:8765"))
-    ap.add_argument("--token", default=os.environ.get("GALPLAY_TOKEN"))
+    ap.add_argument("--server", default=os.environ.get("GALBOOK_SERVER", "http://127.0.0.1:8765"))
+    ap.add_argument("--token", default=os.environ.get("GALBOOK_TOKEN"))
     ap.add_argument("--book", required=True)
     ap.add_argument("--decider", default="keyword", choices=sorted(agent_player.DECIDERS))
     ap.add_argument("--games", type=int, default=2)

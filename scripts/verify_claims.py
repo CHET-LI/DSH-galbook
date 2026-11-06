@@ -49,7 +49,7 @@ rc, out = run("demo", "--books", BOOKS)
 check("python3 -m galbook demo 装出 fog-harbor / fog-harbor-en", rc == 0 and sorted(os.listdir(BOOKS)) == ["fog-harbor", "fog-harbor-en"],
       "ls books → %s\n%s" % (sorted(os.listdir(BOOKS)), out.splitlines()[-1]))
 # 7. 多元选项
-env = {"GALPLAY_BOOKS": BOOKS, "GALPLAY_DATA": DATA, "GALPLAY_BOOK": "fog-harbor", "GALPLAY_AGENT": "v"}
+env = {"GALBOOK_BOOKS": BOOKS, "GALBOOK_DATA": DATA, "GALBOOK_BOOK": "fog-harbor", "GALBOOK_AGENT": "v"}
 run("do", "persona", "text=胆小", env=env)
 rc, out = run("do", "new", "mode=ironman", "hints=1", "h=skip", env=env)
 rc2, out2 = run("do", "next", "n=50", env=env)

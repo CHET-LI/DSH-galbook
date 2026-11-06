@@ -1,7 +1,7 @@
 """各引擎脚本 → galbook/1 中间格式。
 
 内置：qlie / kag（吉里吉里·Tyrano）/ renpy / nscripter / galscript（.gal 手写格式）/ textdump（VNTextPatch 等文本导出，线性）
-插件：环境变量 GALPLAY_PLUGINS（多个用 os.pathsep 分隔）指向 .py 文件或目录；或 build 时 --plugin x.py。
+插件：环境变量 GALBOOK_PLUGINS（多个用 os.pathsep 分隔）指向 .py 文件或目录；或 build 时 --plugin x.py。
       插件模块要有 NAME、build(src, assets=None, **opts) -> (meta, scenes)，可选 detect(src) -> (bool, 说明)。
       详见 docs/IMPORTERS.md。
 """
@@ -25,7 +25,7 @@ def load_plugin(path):
 
 
 def _env_plugins():
-    for p in filter(None, os.environ.get("GALPLAY_PLUGINS", "").split(os.pathsep)):
+    for p in filter(None, os.environ.get("GALBOOK_PLUGINS", "").split(os.pathsep)):
         files = [os.path.join(p, f) for f in sorted(os.listdir(p)) if f.endswith(".py")] if os.path.isdir(p) else [p]
         for f in files:
             if not any(getattr(m, "__file__", None) == f for m in _plugins.values()):

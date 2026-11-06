@@ -13,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 def script(mode, books, data):
     if mode == "cli":
-        env = "GALPLAY_BOOKS=%s GALPLAY_DATA=%s GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=dsh-cli %s -m galbook do " % (books, data, sys.executable)
+        env = "GALBOOK_BOOKS=%s GALBOOK_DATA=%s GALBOOK_BOOK=fog-harbor GALBOOK_AGENT=dsh-cli %s -m galbook do " % (books, data, sys.executable)
         return [("skill", {"name": "galbook"})] + [("bash", {"command": env + c, "description": "galbook " + c.split()[0]})
                                                    for c in ("new", "next n=20", "choose i=2 reason=留在灯旁边帮她", "next n=20")]
     p = "mcp__galbook__galbook_"

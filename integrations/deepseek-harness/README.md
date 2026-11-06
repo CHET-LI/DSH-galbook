@@ -20,7 +20,7 @@ Windows 注意：`command` 写 `python`（或 `py`）；路径用正斜杠或双
 
 ```bash
 python3 -m galbook serve --books books --data play-data --tokens tokens.json    # tokens.json: {"口令A": "alice", "口令B": "bob"}
-GALPLAY_TOKEN=口令A dsh web --patch integrations/deepseek-harness/galbook-http.patch.yml
+GALBOOK_TOKEN=口令A dsh web --patch integrations/deepseek-harness/galbook-http.patch.yml
 ```
 
 见 [`galbook-http.patch.yml`](galbook-http.patch.yml)。令牌绑定了名字时，不管 URL 里写的 `agent=` 是什么，都按令牌的名字玩（防冒名）。
@@ -35,7 +35,7 @@ GALPLAY_TOKEN=口令A dsh web --patch integrations/deepseek-harness/galbook-http
 技能里写了：有 MCP 工具就用 MCP；没有就用 shell 跑 CLI：
 
 ```bash
-export GALPLAY_BOOKS=/path/books GALPLAY_DATA=/path/play-data GALPLAY_BOOK=fog-harbor GALPLAY_AGENT=dsh
+export GALBOOK_BOOKS=/path/books GALBOOK_DATA=/path/play-data GALBOOK_BOOK=fog-harbor GALBOOK_AGENT=dsh
 python3 -m galbook do new
 python3 -m galbook do next n=20
 python3 -m galbook do choose i=2 reason="……"

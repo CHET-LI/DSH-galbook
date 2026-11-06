@@ -224,8 +224,8 @@ class TestDiversity(Base):
 
 class TestCLI(Base):
     def run_do(self, *args, **env):
-        e = dict(os.environ, GALPLAY_BOOKS=self.books, GALPLAY_DATA=os.path.join(self.tmp, "data"), GALPLAY_BOOK="fog",
-                 GALPLAY_AGENT="cli", PYTHONIOENCODING="utf-8")
+        e = dict(os.environ, GALBOOK_BOOKS=self.books, GALBOOK_DATA=os.path.join(self.tmp, "data"), GALBOOK_BOOK="fog",
+                 GALBOOK_AGENT="cli", PYTHONIOENCODING="utf-8")
         e.update(env)
         r = subprocess.run([sys.executable, "-m", "galbook", "do"] + list(args), cwd=ROOT, env=e, capture_output=True)
         return r.returncode, r.stdout.decode("utf-8")
