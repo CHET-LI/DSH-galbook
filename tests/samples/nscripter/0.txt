@@ -1,0 +1,33 @@
+;mode800
+*define
+game
+*start
+bg "bg_001.bmp",1
+夜の海は、思ったより静かだった。\
+ld c,":a;akari.bmp",1
+【灯】「こんな時間に、灯台まで来る人なんて珍しいね」\
+mov %0,0
+if %200==1 goto *menu_secret
+select "手伝う",*help,
+       "今日は帰る",*route_b
+*menu_secret
+select "手伝う",*help,"今日は帰る",*route_b,"岩屋へ行く",*cave
+*help
+add %0,1
+gosub *talk
+if %0>=1 goto *end_a
+goto *route_b
+*talk
+灯「……灯りはね、消えたら終わりなの」\
+return
+*end_a
+mov %200,1
+二人で灯りを守った。夜明けまで。\
+reset
+*route_b
+cl a,1:bg "bg_002.bmp",1
+帰り道、振り返ると灯りはまだ揺れていた。\
+reset
+*cave
+岩屋の奥で、古い航海日誌を見つけた。\
+end

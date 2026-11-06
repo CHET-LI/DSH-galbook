@@ -1,0 +1,21 @@
+@@@ライブラリ\AVGシステム\header.s
+@@MAIN
+\scp,sys	\?sr
+\if,ResultStr[0]!=""\then
+	//
+\end
+^music,bgm001
+^bg0,BG_001
+夜の海は、思ったより静かだった。
+^chara,灯,01,01,中,center,01
+ak_0001,灯,「こんな時間に、灯台まで来る人なんて珍しいね」
+none,誠,「……灯りが見えたから」
+^chara,灯,02
+ak_0002,灯＠灯守,「ふうん。じゃあ、少し手伝ってくれる？」
+\cal,Trust=0
+^select,0,,手伝う,今日は帰る
+^selectpre,1
+^selectjmp
+@@@ライブラリ\AVGシステム\footer.s
+\sub,@@!FilejumpName,self,SelfFileName
+\jmp,ResultStr[0],"シナリオ\Route.s"

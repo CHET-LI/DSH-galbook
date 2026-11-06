@@ -1,0 +1,8 @@
+bg_002.png
+立ち絵/中/灯_中_01_01_02.png
+立ち絵/中/灯_中_01_01_01.png
+bgm001.ogg
+bg_001.png
+bg_003.png
+akari.bmp
+ev01.png

@@ -1,0 +1,11 @@
+# 另一种接法：先起 python3 -m galplay serve（可加 --tokens），dsh 走 Streamable HTTP 连 /mcp。
+# 好处：一个服务给很多 agent 用，每个 agent 一个令牌（令牌绑定名字，防冒名）。
+- insert:
+    - id: mcp-galplay-http
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: galplay
+        transport: streamable-http
+        url: http://127.0.0.1:8765/mcp?book=fog-harbor&agent=dsh-agent
+        headers:
+          Authorization: !!js '`Bearer ${process.env.GALPLAY_TOKEN || ""}`'

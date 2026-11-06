@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+# 你自己导入的游戏和玩家数据：不要提交
+books/
+play-data/
+*.tmp

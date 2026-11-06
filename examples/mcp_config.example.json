@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "galplay": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "galplay",
+        "mcp",
+        "--books",
+        "/path/to/books",
+        "--data",
+        "/path/to/play-data",
+        "--book",
+        "fog-harbor",
+        "--agent",
+        "alice",
+        "--lang",
+        "zh"
+      ],
+      "cwd": "/path/to/galplay-repo",
+      "env": {
+        "PYTHONPATH": "/path/to/galplay-repo"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# DeepSeek Harness（dsh）挂 galplay 的 MCP 服务。
+# 用法 A（临时）：dsh headless --patch galplay.patch.yml "……"
+# 用法 B（常驻）：把下面 insert 合进 $DSH_HOME/profiles/<profile>/cordis.patch.yml（或 $DSH_HOME/cordis.patch.yml）
+# 改三处：command（Windows 一般是 python 或 py）、--books / --data 的绝对路径、cwd 指向 galplay 仓库（没 pip install 时需要）。
+- insert:
+    - id: mcp-galplay
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: galplay
+        transport: stdio
+        command: python3
+        args: ['-m', 'galplay', 'mcp', '--books', '/path/to/books', '--data', '/path/to/play-data',
+               '--book', 'fog-harbor', '--agent', 'dsh-agent', '--lang', 'zh']
+        cwd: /path/to/galplay
+        env:
+          PYTHONPATH: /path/to/galplay
+          PYTHONIOENCODING: utf-8
+        toolCallTimeoutMs: 60000

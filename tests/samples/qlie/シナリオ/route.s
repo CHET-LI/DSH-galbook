@@ -1,0 +1,25 @@
+@@@ライブラリ\AVGシステム\header.s
+@@MAIN
+@@Route_Normal
+@@灯台1日目
+\jmp,@@TOP,"シナリオ\灯台1日目.s"
+@@灯台1日目_end
+@@灯台1日目_sel1_0
+@@灯火ルート
+\jmp,@@TOP,"シナリオ\灯火ルート.s"
+@@灯火ルート_end
+\cal,#ClearA=1
+\jmp,@@GoTitle
+@@灯台1日目_sel1_1
+@@帰路ルート
+\jmp,@@TOP,"シナリオ\帰路ルート.s"
+@@帰路ルート_end
+\jmp,@@GoTitle
+@@Route_Secret
+@@岩屋ルート
+\jmp,@@TOP,"シナリオ\岩屋ルート.s"
+@@岩屋ルート_end
+\cal,#ClearC=1
+\jmp,@@GoTitle
+@@GoTitle
+\scp,sys	\r

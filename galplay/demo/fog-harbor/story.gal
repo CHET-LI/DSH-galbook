@@ -1,0 +1,97 @@
+# 雾港灯塔 —— galplay 自带的演示故事（CC0，随便用）。3 个选项点、4 个结局、1 条通关后解锁的隐藏线。
+title: 雾港灯塔
+author: galplay demo
+license: CC0-1.0
+
+=== prologue 序章
+@bg harbor_night
+@bgm calm_sea
+入夜后，港口被雾吞没。只有远处的灯塔还在一明一灭。
+你是来送最后一班信件的邮差。信封上写着：「致灯塔守夜人·汐」。
+@show 汐 shio_normal center
+汐：「这么大的雾还送信？……你胆子不小。」
+汐：「灯里的油快没了。我得去仓库拿，可那条路被潮水淹了一半。」
+? 你会怎么做？
+- 「我陪你去。」 -> help do f.trust += 1; f.brave += 1
+- 「我在这儿帮你看着灯。」 -> stay do f.trust += 1
+- 「信送到了，我该走了。」 -> leave
+- 「……那封信，其实是寄给二十年前的你吧？」 -> secret if s.cleared_light
+
+* help
+@hide 汐
+@bg path_tide
+冰冷的海水没过脚踝。汐走在前面，提灯在雾里晕成一团。
+汐：「你走路怎么这么吵……不过，谢谢。」
+-> warehouse#
+
+* stay
+@bg lamp_room
+你守在灯旁，替她转动沉重的反光镜。雾里传来汽笛声——有船在找方向。
+汐（远处）：「镜子别停！他们看得见！」
+$ f.saved_ship = 1
+-> warehouse#
+
+* leave
+@clear
+@bg harbor_night
+你把信放在门口的石阶上，转身离开。回头时，灯光比来时暗了一些。
+@end ending 雾里的背影
+
+=== warehouse 仓库
+@bg warehouse
+@show 汐 shio_smile center
+仓库里堆满了旧油桶，和一摞没有拆开的信。全是寄给她的。
+汐：「……我从来不敢拆。怕里面写的是『别等了』。」
+? 你要不要劝她拆开？
+- 「拆吧。不管写什么，你都等得起。」 -> open do f.trust += 1
+- 「不想拆就不拆。灯亮着就好。」 -> keep
+- 偷偷把最上面一封塞进她的外套口袋 -> sneak if f.brave >= 1
+
+* open
+汐撕开信封的手在发抖。读着读着，她笑出了声，又哭了。
+汐：「他说……他说他每天晚上都在海那边看这盏灯。」
+-> finale#
+
+* keep
+汐把信重新码好，像码一摞旧书。
+汐：「谢谢你没逼我。」
+-> finale#
+
+* sneak
+你把信塞进她口袋的时候，她其实看见了，只是没说。
+$ f.trust += 2
+-> finale#
+
+=== finale 黎明
+@bg lamp_room_dawn
+雾散了。天边是一层很薄的金色。
+if f.trust >= 2 -> good
+if f.saved_ship == 1 -> ship
+-> normal
+
+* good
+@cg cg_dawn_together
+汐：「明天……你还送信吗？」
+汐：「我是说，如果有寄给我的。」
+$ s.cleared_light = 1
+@end ending 灯火
+
+* ship
+@cg cg_ship
+港口里停着一艘被灯光救回来的船。船长托人送来一桶新油。
+$ s.cleared_light = 1
+@end ending 归航
+
+* normal
+汐朝你挥了挥手，转身去擦那面镜子。
+@end ending 寻常的早晨
+
+=== secret 二十年前的信
+@route 隐藏线
+@bg lamp_room
+@show 汐 shio_surprised center
+汐：「……你怎么知道？」
+你把信封翻过来。邮戳上的年份，是她来到这座灯塔的那一年。
+汐：「原来，那时候就有人在等我回信了。」
+@cg cg_old_letter
+@end ending 回信

@@ -1,0 +1,97 @@
+# Fog Harbor Lighthouse — galplay demo story (CC0). 3 choice points, 4 endings, 1 route unlocked after a clear.
+title: Fog Harbor Lighthouse
+author: galplay demo
+license: CC0-1.0
+
+=== prologue Prologue
+@bg harbor_night
+@bgm calm_sea
+After dark the harbor drowns in fog. Only the distant lighthouse still blinks.
+You are the courier with the last letter of the day. The envelope reads: "To Shio, keeper of the light."
+@show Shio shio_normal center
+Shio: "Delivering mail in this fog? ...You've got nerve."
+Shio: "The lamp is almost out of oil. I need to fetch some from the warehouse, but the tide has flooded half the path."
+? What do you do?
+- "I'll come with you." -> help do f.trust += 1; f.brave += 1
+- "I'll watch the lamp for you." -> stay do f.trust += 1
+- "The letter's delivered. I should go." -> leave
+- "...That letter was written to you twenty years ago, wasn't it?" -> secret if s.cleared_light
+
+* help
+@hide Shio
+@bg path_tide
+Cold seawater rises over your ankles. Shio walks ahead, her lantern a blur in the fog.
+Shio: "You're so loud when you walk... but thanks."
+-> warehouse#
+
+* stay
+@bg lamp_room
+You stay by the lamp and turn the heavy mirror for her. A ship's horn sounds in the fog, searching for its way.
+Shio: "Don't stop the mirror! They can see it!"
+$ f.saved_ship = 1
+-> warehouse#
+
+* leave
+@clear
+@bg harbor_night
+You leave the letter on the stone step and walk away. When you look back, the light seems dimmer than before.
+@end ending A Back in the Fog
+
+=== warehouse Warehouse
+@bg warehouse
+@show Shio shio_smile center
+The warehouse is full of old oil drums, and a stack of unopened letters. All addressed to her.
+Shio: "...I never dared open them. In case they say 'stop waiting'."
+? Do you encourage her to open them?
+- "Open them. Whatever they say, you can bear it." -> open do f.trust += 1
+- "If you don't want to, don't. The light is enough." -> keep
+- Quietly slip the top letter into her coat pocket -> sneak if f.brave >= 1
+
+* open
+Her hands shake as she tears the envelope. Reading, she laughs, then cries.
+Shio: "He says... he watches this light every night from across the sea."
+-> finale#
+
+* keep
+Shio stacks the letters back neatly, like old books.
+Shio: "Thank you for not pushing me."
+-> finale#
+
+* sneak
+She saw you slip the letter into her pocket. She just didn't say anything.
+$ f.trust += 2
+-> finale#
+
+=== finale Dawn
+@bg lamp_room_dawn
+The fog lifts. A thin line of gold appears on the horizon.
+if f.trust >= 2 -> good
+if f.saved_ship == 1 -> ship
+-> normal
+
+* good
+@cg cg_dawn_together
+Shio: "Will you... deliver mail again tomorrow?"
+Shio: "I mean, if there's any for me."
+$ s.cleared_light = 1
+@end ending The Light
+
+* ship
+@cg cg_ship
+In the harbor sits a ship the light brought home. The captain sends a barrel of fresh oil.
+$ s.cleared_light = 1
+@end ending Homecoming
+
+* normal
+Shio waves at you, then turns to polish the mirror.
+@end ending An Ordinary Morning
+
+=== secret Twenty Years Ago
+@route Hidden route
+@bg lamp_room
+@show Shio shio_surprised center
+Shio: "...How did you know?"
+You turn the envelope over. The postmark's year is the year she came to this lighthouse.
+Shio: "So even back then, someone was waiting for my reply."
+@cg cg_old_letter
+@end ending The Reply
