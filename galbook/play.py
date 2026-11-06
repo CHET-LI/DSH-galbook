@@ -34,7 +34,7 @@ class Library(object):
             out.append({"slug": slug, "title": st.title or slug, "mode": st.mode, "engine": st.meta.get("engine", ""),
                         "scenes": len(st.scenes), "routes": [r.get("title") for r in st.routes],
                         "players": len(self.store.agents(slug)),
-                        "problems": st.problems[:20]})
+                        "problem_count": len(st.problems), "problems": st.problems[:20]})
         return out
 
     def story(self, slug):
