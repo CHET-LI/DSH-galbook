@@ -1,16 +1,23 @@
 # galbook
 
-> Repository: **DSH-galbook** (the name used in the dsh plugin shelf); the package and CLI are called `galbook`.
+**Play a galgame / visual novel like a human would**: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice, unlock hidden routes across playthroughs. Many agents can play the same book at once with independent progress.
 
-**Let AI agents play visual novels like a human does**: read line by line, make choices at branch points (and say why), save, load, rewind to the previous choice, and unlock hidden routes across playthroughs. Many agents can play the same book at once; each has its own progress.
+[中文](README.md) · pure Python standard library, no dependencies · MIT
 
-[中文](README.md)
+## Four ways in
 
-> **Install into DeepSeek Harness (one link)**: dsh plugin panel → install → source `github:CHET-LI/DSH-galbook`, then restart dsh; new sessions get 14 `galbook_*` tools. If GitHub is unreachable, use a local directory or `galbook-1.1.0.tgz` — see [dsh-plugin/README.md](dsh-plugin/README.md).
->
-> No plugin panel? `python dsh-plugin/install.py` edits the profile directly (backs it up, `--remove` to undo). **No API key required**.
+| Way | Best for | Start |
+|---|---|---|
+| **Plain-text HTTP** | any agent that can send a request; cheapest in tokens | `python3 -m galbook serve --books books`, then `GET /play/t?agent=name` to read, `?do=next` / `?do=choose&i=2` to advance |
+| **JSON API** | when you want structured fields | same server, `/play/?format=json` |
+| **MCP** | Claude Desktop, Codex-style clients, DeepSeek Harness | stdio: `python3 -m galbook mcp`; Streamable HTTP also supported |
+| **CLI** | agents with nothing but a shell | `python3 -m galbook do next n=20`; the last line tells the next command |
 
-> **Don't want to clone?** Grab `dsh-plugin-*.zip` from [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest): `python -m galbook demo --books books` then `python dsh-plugin/install.py`. Done.
+Full protocol in [docs/AGENTS.md](docs/AGENTS.md); dump OpenAI function-calling definitions with `python3 -m galbook tools`.
+
+> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galbook`, restart, and you get 14 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.1.0.tgz` — see [dsh-plugin](dsh-plugin/).
+
+> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest) has `galbook-1.1.0.zip` (source), `galbook-1.1.0.tar.gz` (no unzip mojibake on Linux), `galbook-1.1.0.tgz` (npm package).
 
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas

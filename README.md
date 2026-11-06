@@ -1,22 +1,27 @@
 # galbook
 
-> 仓库：**DSH-galbook**（dsh 插件市场里的名字）；命令和包名统一叫 `galbook`。
-
 **让 agent 像人一样玩 galgame / 视觉小说**：一句一句读剧情，遇到选项自己选并写理由，存档、读档、回到上个选项、多周目解锁隐藏线。很多 agent 可以同时玩同一本书，各自的进度互不干扰。
 
-[English](README.en.md)
+[English](README.en.md) · 纯 Python 标准库，没有依赖 · MIT
 
-> **装进 DeepSeek Harness（一行链接）**：dsh 的插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galbook`，装完重启 dsh，新会话里会多出 14 个 `galbook_*` 工具。连不上 GitHub 时改用本地目录或 `galbook-1.1.0.tgz`，见 [dsh-plugin/README.md](dsh-plugin/README.md)。
->
-> 不想用插件面板也行：`python dsh-plugin/install.py` 直接改 profile（自动备份、可 `--remove` 卸掉）。**不需要 API key**。
+## 怎么接（任选一种）
 
-> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galbook/releases/latest) 里有 `galbook-1.1.0.zip`（源码）、`galbook-1.1.0.tgz`（npm 包，可直接给插件面板当本地来源）、`dsh-plugin-1.1.0.zip`（带安装脚本）。
+| 方式 | 适合 | 怎么起 |
+|---|---|---|
+| **纯文本 HTTP** | 任何能发请求的 agent，最省 token | `python3 -m galbook serve --books books`，然后 `GET /play/t?agent=名字` 读，`?do=next` / `?do=choose&i=2` 推进 |
+| **JSON API** | 想要结构化字段 | 同上，`/play/?format=json` |
+| **MCP** | Claude Desktop、Codex 类、DeepSeek Harness | stdio：`python3 -m galbook mcp`；也支持 Streamable HTTP |
+| **命令行** | 只有 shell 的 agent | `python3 -m galbook do next n=20`，输出最后一行就是下一步该跑的命令 |
 
-- 只用 Python 标准库，没有依赖
-- 接法：**纯文本 HTTP**（最省 token，什么 agent 都能用）、**JSON API**、**MCP**（stdio 和 Streamable HTTP）、**CLI**（给只有 shell 的 agent）、**技能文件**（Anthropic Skill 格式），另外导出 **OpenAI function-calling** 工具定义
-- 现成适配 **DeepSeek Harness（dsh）**：MCP + 技能 + CLI 三条路都实测过，见 [integrations/deepseek-harness](integrations/deepseek-harness/)
+完整字段和协议在 [docs/AGENTS.md](docs/AGENTS.md)；OpenAI function-calling 的工具定义用 `python3 -m galbook tools` 导出。
+
+> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galbook`，重启即可（包在根目录声明了组合包，多出 14 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.1.0.tgz`，见 [dsh-plugin](dsh-plugin/)。
+
+> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galbook/releases/latest) 有 `galbook-1.1.0.zip`（源码）、`galbook-1.1.0.tar.gz`（Linux 免解压乱码）、`galbook-1.1.0.tgz`（npm 包）。
+
 - 带网页：看每个 agent 玩到哪、选了什么、为什么选；人也能自己玩
 - 导入器：QLIE、吉里吉里 KAG / TyranoScript、Ren'Py、NScripter、自带的 `.gal` 手写格式；另外能吃 VNTextPatch 等工具导出的文本（20 多种引擎，只能线性读），还能写插件接新引擎
+- 另外附：Anthropic Skill 格式的技能文件、dsh 适配示例（[integrations/deepseek-harness](integrations/deepseek-harness/)）、`verify_claims.py` 逐条自检脚本
 
 ![三个 agent 同时在玩，网页上看其中一个](docs/img/watch.png)
 
