@@ -1,10 +1,30 @@
 {
   "name": "galbook",
-  "version": "1.2.2",
-  "private": true,
+  "version": "1.2.3",
   "type": "module",
-  "description": "galbook: galgame plugin for DeepSeek Harness — an agent reads the script and picks choices by itself",
+  "description": "Let an AI agent play galgames/visual novels by itself: read line by line, choose on its own with a written reason, save/load/rewind. Ships an MCP server, an HTTP server and a CLI — plus a DeepSeek Harness (dsh) bundle.",
   "license": "MIT",
+  "author": "CHET-LI",
+  "homepage": "https://github.com/CHET-LI/DSH-galbook",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CHET-LI/DSH-galbook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CHET-LI/DSH-galbook/issues"
+  },
+  "keywords": [
+    "galgame",
+    "visual-novel",
+    "mcp",
+    "mcp-server",
+    "ai-agent",
+    "llm",
+    "dsh-plugin",
+    "deepseek-harness",
+    "text-adventure",
+    "galbook"
+  ],
   "icon": "./icon.svg",
   "exports": {
     "./package.json": "./package.json",
@@ -16,6 +36,7 @@
     "locale/*.json",
     "icon.svg",
     "README.md",
+    "README.en.md",
     "LICENSE",
     "dsh-plugin/**",
     ".agents/**"

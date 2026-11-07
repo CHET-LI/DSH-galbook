@@ -18,6 +18,17 @@ class Library(object):
     def __init__(self, books_dir, data_dir):
         self.books_dir = books_dir
         self.store = Store(data_dir)
+        # 装完就能玩：books 不存在或空的时候，自动装自带演示书（npm 包场景）
+        try:
+            import sys as _sys
+            from .demo_boot import empty, ensure_demo_books
+            if empty(books_dir):
+                n = ensure_demo_books(books_dir)
+                if n:
+                    # 只能写 stderr：MCP 走 stdio 时 stdout 是协议通道
+                    print("（books 目录是空的，已自动装入 %d 本演示书）" % n, file=_sys.stderr)
+        except Exception:
+            pass
 
     # ---- 书 ----
     def books(self):

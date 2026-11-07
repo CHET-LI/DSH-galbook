@@ -12,4 +12,4 @@
   i18n.py      文本接口 zh / en
 只用 Python 标准库。
 """
-VERSION = "galbook-1.2.2"
+VERSION = "galbook-1.2.3"

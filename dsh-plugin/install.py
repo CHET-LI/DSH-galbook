@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """把 galbook 挂进 DeepSeek Harness（dsh）——一条命令，不用手改 YAML。
 
