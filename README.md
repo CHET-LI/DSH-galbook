@@ -15,9 +15,9 @@
 
 完整字段和协议在 [docs/AGENTS.md](docs/AGENTS.md)；OpenAI function-calling 的工具定义用 `python3 -m galbook tools` 导出。
 
-> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galbook`，重启即可（包在根目录声明了组合包，多出 15 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.4.tgz`，见 [dsh-plugin](dsh-plugin/)。
+> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galgame-galbook`，重启即可（包在根目录声明了组合包，多出 15 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.4.tgz`，见 [dsh-plugin](dsh-plugin/)。
 
-> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galbook/releases/latest) 有 `galbook-1.2.3.zip`（源码）、`galbook-1.2.3.tar.gz`（Linux 免解压乱码）、`galbook-1.2.4.tgz`（npm 包）。
+> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) 有 `galbook-1.2.3.zip`（源码）、`galbook-1.2.3.tar.gz`（Linux 免解压乱码）、`galbook-1.2.4.tgz`（npm 包）。
 
 - 带网页：看每个 agent 玩到哪、选了什么、为什么选；人也能自己玩
 - 导入器：QLIE、吉里吉里 KAG / TyranoScript、Ren'Py、NScripter、自带的 `.gal` 手写格式；另外能吃 VNTextPatch 等工具导出的文本（20 多种引擎，只能线性读），还能写插件接新引擎

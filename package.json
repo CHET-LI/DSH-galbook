@@ -5,13 +5,13 @@
   "description": "Play a galgame / visual novel like a human would: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.",
   "license": "MIT",
   "author": "CHET-LI",
-  "homepage": "https://github.com/CHET-LI/DSH-galbook",
+  "homepage": "https://github.com/CHET-LI/DSH-galgame-galbook",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CHET-LI/DSH-galbook.git"
+    "url": "git+https://github.com/CHET-LI/DSH-galgame-galbook.git"
   },
   "bugs": {
-    "url": "https://github.com/CHET-LI/DSH-galbook/issues"
+    "url": "https://github.com/CHET-LI/DSH-galgame-galbook/issues"
   },
   "keywords": [
     "galgame",
