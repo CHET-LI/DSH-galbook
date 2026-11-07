@@ -1,0 +1,11 @@
+.select title.map
+		はじめ	アイテムＡ
+		リミットＯＮ	アイテムＤ	1 !リミッタ
+		設定	アイテムＣ
+.case 1
+	.load a-master.txt
+.case 2
+	?リミッタ = 1
+.case 3
+	.system config
+.endsel

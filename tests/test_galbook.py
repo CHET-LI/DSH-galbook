@@ -444,3 +444,17 @@ class TestCoverage(unittest.TestCase):
                                                    "options": [{"text": "A", "goto": {"scene": "a"}},
                                                                {"text": "B", "goto": {"scene": "a"}}]}]}})
         self.assertEqual(st.warnings, [])
+
+    def test_build_cli_passes_on_bundled_samples(self):
+        """自带样例用 build 命令（含「选择点对数」校验）都要能过。
+        回归：QLIE 开局路线选择（RouteSelect/main.s 生成的 routeselect）以前没算进 stats.choices，
+        build 报「选择点对不上」拒绝写出。"""
+        import contextlib
+        import io
+        from galbook.build import main as build_main
+        for eng in ENGINES:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = build_main(["--src", os.path.join(SAMPLES, eng), "--out", os.path.join(tempfile.mkdtemp(), "story"),
+                                 "--engine", eng, "--dry-run"])
+            self.assertEqual(rc, 0, "%s: %s" % (eng, buf.getvalue()[-400:]))

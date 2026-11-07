@@ -463,6 +463,7 @@ class Importer(object):
                         o["if"] = "!(%s)" % lock
                     opts.append(o)
             b.add("choice", id="routeselect", prompt="选择开始的路线", options=opts, auto_single=True)
+            self.stats["choices"] += 1      # 开局路线选择也是脚本（routeselect.s）里来的选择点，计数要对上 build 的校验
         elif route_sid:
             b.add("jump", scene=route_sid, label=None)
         else:

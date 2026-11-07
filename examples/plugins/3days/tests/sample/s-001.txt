@@ -1,0 +1,41 @@
+.chapter	巒傑傝
+.img0 bg_001.img
+.voice	\\v_001
+小明:你好，@世界。
+这是旁白。
+;慖戰巿
+.select
+	跟他一起走 ;注释
+	一个人走
+	
+	再想想
+.case 1
+	.load s-002.txt
+.case 2
+	?堦恖 = 1
+	我决定一个人。
+.case 3
+	.goto #屻偱
+.endsel
+走了以后。
+#屻偱
+.if 堦恖 & !擇恖
+{
+	一个人的时候。
+}
+.else
+另一种情况。
+.if 堦恖 | 擇恖
+{
+	.select
+		甲
+		乙
+	.case 1
+		.load s-003.txt
+	.case 2
+		.load s-002.txt
+	.endsel
+}
+.wait 100
+.fade 10
+.

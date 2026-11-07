@@ -52,7 +52,7 @@ def build(src, assets=None, **opts):  # 必须：返回 (meta, scenes)
     ...
 ```
 
-`scenes` 是 `{场景id: {"id", "title", "ops": [...], "tags": [], "route": ""}}`，`ops` 是 [SCHEMA.md](SCHEMA.md) 里的指令；`meta` 至少要有 `format: "galbook/1"`、`entry`、`scenes`。`importers/common.py` 里有现成的帮手：`SceneB`（攒指令）、`Assets`（按文件名找图，`assets.find(name)`）、`read_text`（自动认 UTF-8/Shift-JIS/GBK）、`is_h_title`。最小的完整例子：[`tests/plugins/myfmt.py`](../tests/plugins/myfmt.py)。
+`scenes` 是 `{场景id: {"id", "title", "ops": [...], "tags": [], "route": ""}}`，`ops` 是 [SCHEMA.md](SCHEMA.md) 里的指令；`meta` 至少要有 `format: "galbook/1"`、`entry`、`scenes`。`importers/common.py` 里有现成的帮手：`SceneB`（攒指令）、`Assets`（按文件名找图，`assets.find(name)`）、`read_text`（自动认 UTF-8/Shift-JIS/GBK）、`is_h_title`。最小的完整例子：[`tests/plugins/myfmt.py`](../tests/plugins/myfmt.py)。真实游戏的完整例子（分支、条件、混合编码）：[`examples/plugins/3days/`](../examples/plugins/3days/)。
 
 用法：
 
