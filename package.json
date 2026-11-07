@@ -2,7 +2,7 @@
   "name": "galbook",
   "version": "1.2.5",
   "type": "module",
-  "description": "Play a galgame / visual novel like a human would: read one line at a time, pick choices yourself and write down why, save, load, rewind. It also sees the screen - background, who stands where, which expression; the first time it meets a CG the image comes with the text. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.",
+  "description": "Play a galgame / visual novel like a human would: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. It also sees the screen — the background, who stands on which side, which expression; the first time it meets a CG the image comes with the text, and galbook_look shows whatever is on screen right now. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.",
   "license": "MIT",
   "author": "CHET-LI",
   "homepage": "https://github.com/CHET-LI/DSH-galgame-galbook",
