@@ -25,6 +25,8 @@ def main(argv=None):
     ap.add_argument("--title")
     ap.add_argument("--entry")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--strict", action="store_true",
+                    help="有未识别指令或选择点对不上就失败（默认只警告）")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     for p in a.plugin:
@@ -45,11 +47,27 @@ def main(argv=None):
         meta["title"] = a.title
     probs = validate(meta, scenes)
     st = meta.get("stats", {})
+    hist = {}
+    for sc in scenes.values():
+        for op in sc.get("ops", []):
+            hist[op.get("op")] = hist.get(op.get("op"), 0) + 1
+    _sel = st.get("choices")
+    if isinstance(_sel, int) and _sel != hist.get("choice", 0):
+        probs.append("选择点对不上：脚本里认出 %d 个 .select/choice，生成出来的 choice op 只有 %d 个"
+                     "（中间可能被当成普通文本吃掉了）" % (_sel, hist.get("choice", 0)))
+    print("结构：" + json.dumps(hist, ensure_ascii=False))
+    print("分支：choice %d 个、jump %d 个、end %d 个%s" % (
+        hist.get("choice", 0), hist.get("jump", 0), hist.get("end", 0),
+        "   ← 一个选择点都没有，检查转换器是不是吞了选项" if len(scenes) > 3 and not hist.get("choice") else ""))
+    st["ops"] = hist
     print("统计：" + json.dumps({k: v for k, v in st.items() if k not in ("assets", "unknown")}, ensure_ascii=False))
     print("图片解析：" + json.dumps(st.get("assets"), ensure_ascii=False))
     print("未识别指令（前 20）：" + json.dumps(st.get("unknown"), ensure_ascii=False))
     print("警告 %d 条%s" % (len(meta.get("warnings", [])), ("：" + "；".join(meta["warnings"][:5])) if meta.get("warnings") else ""))
     print("校验：%s" % ("通过" if not probs else "%d 个问题：%s" % (len(probs), "；".join(probs[:10]))))
+    if a.strict and (probs or st.get("unknown")):
+        print("--strict：有未识别指令或校验问题，按约定失败")
+        return 1
     if probs and not a.force:
         print("有校验问题，没写文件（--force 强制写）")
         return 1

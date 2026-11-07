@@ -381,3 +381,35 @@ class TestDeadEnd(unittest.TestCase):
                              {"a": {"title": "ok", "ops": [{"op": "say", "text": "hi"},
                                                            {"op": "end", "kind": "ending", "name": "完"}]}})
         self.assertEqual(st.problems, [])
+
+
+class TestCoverage(unittest.TestCase):
+    """分支覆盖率看得见：op 计数、books() 里能直接读出这套书有几个选择点。"""
+
+    def _book(self, ops):
+        meta = {"format": "galbook/1", "title": "覆盖率样本", "engine": "test", "mode": "branch",
+                "entry": {"scene": "a"}, "scenes": {}, "routes": []}
+        return meta, {"a": {"title": "第一幕", "ops": ops}}
+
+    def test_op_counts(self):
+        meta, scenes = self._book([{"op": "say", "text": "一"},
+                                   {"op": "choice", "id": "s1", "options": [
+                                       {"text": "A", "goto": {"scene": "a"}},
+                                       {"text": "B", "goto": {"scene": "a"}}]},
+                                   {"op": "jump", "scene": "a"}])
+        st = story_from_dict(meta, scenes)
+        self.assertEqual(st.op_counts.get("choice"), 1)
+        self.assertEqual(st.op_counts.get("jump"), 1)
+        self.assertEqual(st.op_counts.get("say"), 1)
+
+    def test_books_reports_choice_count(self):
+        meta, scenes = self._book([{"op": "say", "text": "一"},
+                                   {"op": "jump", "scene": "a"}])
+        tmp = tempfile.mkdtemp()
+        try:
+            save_story(os.path.join(tmp, "books", "t", "story"), meta, scenes)
+            b = Library(os.path.join(tmp, "books"), os.path.join(tmp, "data")).books()[0]
+            self.assertEqual(b["choices"], 0, "没有选择点要如实报 0，别让人以为能分叉")
+            self.assertEqual(b["jumps"], 1)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

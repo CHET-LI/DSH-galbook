@@ -98,6 +98,18 @@ class Story(object):
                 return None
         return None
 
+    @property
+    def op_counts(self):
+        """全库 op 计数（say/choice/jump/end…）。choice 为 0 的分支书 = 转换时把选项丢了。"""
+        if not hasattr(self, "_op_counts"):
+            c = {}
+            for sc in self.scenes.values():
+                for op in sc.ops:
+                    k = op.get("op")
+                    c[k] = c.get(k, 0) + 1
+            self._op_counts = c
+        return self._op_counts
+
     def _count(self):
         if not hasattr(self, "_counts"):
             cgs, ends = set(), set()
