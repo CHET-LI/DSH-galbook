@@ -15,9 +15,9 @@
 
 完整字段和协议在 [docs/AGENTS.md](docs/AGENTS.md)；OpenAI function-calling 的工具定义用 `python3 -m galbook tools` 导出。
 
-> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galgame-galbook`，重启即可（包在根目录声明了组合包，多出 16 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.5.tgz`，见 [dsh-plugin](dsh-plugin/)。
+> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galgame-galbook`，重启即可（包在根目录声明了组合包，多出 16 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.6.tgz`，见 [dsh-plugin](dsh-plugin/)。
 
-> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) 里有 `galbook-1.2.5.tgz`（npm 包，装完即用）；源码直接用 GitHub 自动生成的 Source code (zip / tar.gz)——tar.gz 在 Linux 上没有解压乱码。
+> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) 里有 `galbook-1.2.6.tgz`（npm 包，装完即用）；源码直接用 GitHub 自动生成的 Source code (zip / tar.gz)——tar.gz 在 Linux 上没有解压乱码。
 
 - 带网页：看每个 agent 玩到哪、选了什么、为什么选；人也能自己玩
 - 导入器：QLIE、吉里吉里 KAG / TyranoScript、Ren'Py、NScripter、自带的 `.gal` 手写格式；另外能吃 VNTextPatch 等工具导出的文本（20 多种引擎，只能线性读），还能写插件接新引擎
@@ -76,7 +76,7 @@ python3 examples/party.py --book fog-harbor
 | 收集 | `do=gallery` | 结局 / 路线 / CG / 已读进度 |
 | 像不像人 | `do=profile` | 选前读了几句、理由率、思考时间、是不是总选第一个 |
 | 跳过已读 | `next&skip=1` | 二周目快进到没读过的地方 |
-| 画面 | 默认（书里有图时）/ `next&img=1` / `do=look` | 画面一变多一行 `〔画面〕bg=… \| sp=雫:center(表情码)`；`img=1` 只在第一次见到的 CG 和结局那屏附图；`look` 看当前画面。MCP 直接返回图片（BMP 自动转 PNG），文本接口给 `/b/<书>/<路径>` |
+| 画面 | 默认（书里有图时）/ `next&img=1` / `do=look` | 画面一变多一行 `〔画面〕bg=… \| sp=雫:center(表情码)`；`img=1` 只在第一次见到的 CG 和结局那屏附图；`look` 看当前画面。MCP 直接返回图片（BMP 自动转 PNG），文本接口给 `/b/<书>/<路径>`（`?fmt=png` 直接给转好的 PNG，不用自己转 1.4MB 的 BMP；`&w=480` 限长边） |
 
 ## 接到你的 agent
 

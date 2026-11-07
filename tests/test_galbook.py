@@ -269,6 +269,22 @@ class TestHTTPConcurrent(unittest.TestCase):
         self.assertEqual(self.code("/b/light/assets/../story/story.json"), 403)
         self.assertEqual(self.code("/b/light/assets/%2e%2e/story/story.json"), 403)
 
+    def test_bmp_png_query(self):
+        """?fmt=png 把 BMP 转成 PNG；不加 fmt 还是原图。走 HTTP 的 agent 不用自己转。"""
+        p = os.path.join(self.tmp, "books", "light", "assets", "bg.bmp")
+        if not os.path.exists(p):
+            with open(p, "wb") as f:
+                f.write(_bmp(8, 6, (10, 20, 30)))
+        with urllib.request.urlopen("http://127.0.0.1:%d/b/light/assets/bg.bmp?fmt=png" % self.port, timeout=20) as r:
+            self.assertEqual(r.headers.get("Content-Type"), "image/png")
+            self.assertTrue(r.read().startswith(b"\x89PNG"))
+        with urllib.request.urlopen("http://127.0.0.1:%d/b/light/assets/bg.bmp?fmt=png&w=4" % self.port, timeout=20) as r:
+            from galbook.imaging import png_size
+            self.assertEqual(png_size(r.read()), (4, 3))          # 长边 4：8×6 → 4×3
+        with urllib.request.urlopen("http://127.0.0.1:%d/b/light/assets/bg.bmp" % self.port, timeout=20) as r:
+            self.assertEqual(r.headers.get("Content-Type"), "image/bmp")
+            self.assertTrue(r.read().startswith(b"BM"))
+
     def test_50_agents(self):
         errs, endings = [], {}
 
@@ -642,10 +658,10 @@ class TestPictures(unittest.TestCase):
         self._text("new")
         t = self._text("next", n=50, img=True)
         urls = [x for x in t.splitlines() if x.startswith("〔图〕")]
-        self.assertEqual(urls, ["〔图〕CG（第一次） /b/p/assets/cg.bmp"], t)     # 结局那屏也是这张 CG：去重
+        self.assertEqual(urls, ["〔图〕CG（第一次） /b/p/assets/cg.bmp?fmt=png"], t)     # 结局那屏也是这张 CG：去重
         self._text("new")
         t = self._text("next", n=50, img=True)
-        self.assertEqual([x for x in t.splitlines() if x.startswith("〔图〕")], ["〔图〕结局：CG /b/p/assets/cg.bmp"])
+        self.assertEqual([x for x in t.splitlines() if x.startswith("〔图〕")], ["〔图〕结局：CG /b/p/assets/cg.bmp?fmt=png"])
 
     def test_look_and_mcp_images(self):
         import base64

@@ -23,6 +23,7 @@ from urllib.parse import unquote, parse_qs
 from . import VERSION
 from .web import App
 from . import mcp_server
+from .imaging import load_for_model
 
 
 class Auth(object):
@@ -157,8 +158,21 @@ def make_handler(app, books_dir, auth, cors=False, quiet=False, lang="zh"):
                 target = os.path.realpath(os.path.join(base, sub))
                 if not target.startswith(base + os.sep) or not os.path.isfile(target):
                     return self._send(404, b"not found", "text/plain")
+                # ?fmt=png  → 走 load_for_model：BMP 转 PNG（老引擎的 CG/背景都是 BMP，
+                #              原图一张 1.4MB，转完几十 KB）；PNG/JPEG 原样。?w=N 是长边上限。
+                q = {k: v[-1] for k, v in parse_qs(self.path.split("?", 1)[1] if "?" in self.path else "",
+                                                   keep_blank_values=True).items()}
+                fmt = (q.get("fmt") or "").lower()
                 with open(target, "rb") as f:
                     data = f.read()
+                if fmt in ("png", "auto"):
+                    try:
+                        w = int(q.get("w") or 0) or 1280
+                    except ValueError:
+                        w = 1280
+                    mime, out = load_for_model(target, max_side=w)
+                    if mime:
+                        return self._send(200, out, mime)
                 return self._send(200, data, mimetypes.guess_type(target)[0] or "application/octet-stream")
             return self._send(404, b"not found", "text/plain")
 

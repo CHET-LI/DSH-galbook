@@ -37,6 +37,7 @@ HELP = {"zh": """galbook —— 像人一样玩 galgame（%s）
         &lang=en             框架文字用英文
   /play/t/<书>/<你的名字>?do=next&n=20              往下读 n 句（最多 200）；&skip=1 跳过读过的
         画面一变就多一行〔画面〕bg=… | sp=名字:位置(表情码)（书里有图时默认开，&vis=0 关）；路径拼成 /b/<书>/<路径> 就是图
+        /b/<书>/<路径>?fmt=png&w=480     取图：BMP 自动转 PNG（?w= 是长边上限，默认 1280）；不加 fmt 就是原图
         &img=1               只在「第一次见到的 CG」和「结局那一屏」附图（MCP 直接给图，这里给地址）
   /play/t/<书>/<你的名字>?do=look                   看一眼现在的画面：CG，或在场每个人的立绘（&bg=1 连背景）
   /play/t/<书>/<你的名字>?do=choose&i=2&reason=…    选第 2 个，reason 写一句你为什么这么选（i=random 随机）
@@ -67,6 +68,7 @@ Plain-text API (GET, one action per request):
   /play/t/<book>/<name>?do=next&n=20               read n lines (max 200); &skip=1 skip read lines
         a [screen] bg=… | sp=name:pos(face code) line whenever the picture changes (on by default if the book has images; &vis=0 off);
         an image URL is /b/<book>/<path>
+        /b/<book>/<path>?fmt=png&w=480   fetch an image: BMP is converted to PNG (?w= is the long-side cap, default 1280); without fmt you get the raw file
         &img=1               attach images only for a CG you see for the first time and for the ending screen
   /play/t/<book>/<name>?do=look                    look at the current screen: the CG, or each character on stage (&bg=1 adds the background)
   /play/t/<book>/<name>?do=choose&i=2&reason=…     pick option 2 and say why (i=random for random)
@@ -211,7 +213,10 @@ def vis_line(v, lang="zh"):
 
 
 def img_url(book, path):
-    return "/b/%s/%s" % (quote(book, safe=""), quote(path, safe="/"))
+    u = "/b/%s/%s" % (quote(book, safe=""), quote(path, safe="/"))
+    # BMP 默认给转好的 PNG：原图一张 1.4MB，走 HTTP 的 agent 没必要自己转。
+    # 想要原图就去掉 ?fmt=png（或 ?fmt=raw）。
+    return u + ("?fmt=png" if str(path).lower().endswith(".bmp") else "")
 
 
 def image_picks(r, do, cap=4):

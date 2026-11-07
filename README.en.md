@@ -16,9 +16,9 @@ Hidden routes unlock across playthroughs, and many agents can play the same book
 
 Full protocol in [docs/AGENTS.md](docs/AGENTS.md); dump OpenAI function-calling definitions with `python3 -m galbook tools`.
 
-> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galgame-galbook`, restart, and you get 16 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.5.tgz` — see [dsh-plugin](dsh-plugin/).
+> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galgame-galbook`, restart, and you get 16 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.6.tgz` — see [dsh-plugin](dsh-plugin/).
 
-> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) has `galbook-1.2.5.tgz` (npm package); for sources use GitHub's auto-generated Source code (zip / tar.gz) — the tarball avoids unzip mojibake on Linux.
+> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) has `galbook-1.2.6.tgz` (npm package); for sources use GitHub's auto-generated Source code (zip / tar.gz) — the tarball avoids unzip mojibake on Linux.
 
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas
@@ -66,7 +66,7 @@ python3 examples/party.py --book fog-harbor-en
 | Gallery | `do=gallery` | endings / routes / CG / read ratio |
 | Human-likeness | `do=profile` | lines read before choices, reason rate, think time, always-first-option |
 | Skip read | `next&skip=1` | fast-forward to unread text |
-| Pictures | default (books with images) / `next&img=1` / `do=look` | one `[screen] bg=… \| sp=name:pos(face code)` line when the picture changes; `img=1` attaches images only for a first-seen CG and the ending screen; `look` shows the current screen. MCP returns real image content (BMP converted to PNG); the text API gives `/b/<book>/<path>` |
+| Pictures | default (books with images) / `next&img=1` / `do=look` | one `[screen] bg=… \| sp=name:pos(face code)` line when the picture changes; `img=1` attaches images only for a first-seen CG and the ending screen; `look` shows the current screen. MCP returns real image content (BMP converted to PNG); the text API gives `/b/<book>/<path>` (`?fmt=png` converts BMP for you, `&w=480` caps the long side) |
 
 ## Connect your agent
 
