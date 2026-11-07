@@ -90,7 +90,7 @@ class Library(object):
         st = engine.new_state(story, h=h, mode=mode, hints=hints, lang=lang or S.profile.get("lang") or "zh")
         S.set_run(st)
         S.profile["stats"]["games"] = S.profile["stats"].get("games", 0) + 1
-        r = engine.advance(story, st, S.profile["s"], S.profile["seen"], n=0)
+        r = self._advance_clicks(story, S, st, 0, False)
         S.profile["stats"]["lines"] = S.profile["stats"].get("lines", 0) + len(r["lines"])
         self._decorate(story, S, st, r)
         return {"ok": True, "msg": "新游戏开始（第 %d 周目）" % S.profile["stats"]["games"], "state": r,
@@ -244,7 +244,7 @@ class Library(object):
             st["pending"]["shown_at"] = time.time()
         S.set_run(st)
         S.profile["stats"]["loads"] = S.profile["stats"].get("loads", 0) + 1
-        r = engine.advance(story, st, S.profile["s"], S.profile["seen"], n=0)
+        r = self._advance_clicks(story, S, st, 0, False)
         self._decorate(story, S, st, r)
         return {"ok": True, "msg": "读档 %s" % slot, "meta": d.get("meta"), "state": r, "opts": st.get("opts"),
                 "recent": [dict(who=x["who"], text=x["text"]) for x in st.get("log", [])[-5:]]}

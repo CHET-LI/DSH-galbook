@@ -566,3 +566,22 @@ class TestNoDemo(unittest.TestCase):
             self.assertFalse(os.path.isdir(os.path.join(tmp, "b")) and os.listdir(os.path.join(tmp, "b")))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_click_on_very_first_line_marks_and_works(self):
+        """可点句子如果是 new 直接返回的第一句，也要挂 ◇ 并且点得动。
+        回归：_a_new 以前用 engine.advance，不走 _advance_clicks，首句的 ◇ 永远不会出现。"""
+        meta = {"format": "galbook/1", "title": "首句可点", "engine": "test", "mode": "branch",
+                "entry": {"scene": "a"}, "scenes": {}, "routes": [{"id": "r"}]}
+        scenes = {"a": {"title": "开场", "ops": [
+            {"op": "say", "who": "甲", "text": "尼尼？",
+             "click": {"id": "T1", "set": "f.T1 = 1", "if": "!f.T1"}},
+            {"op": "say", "who": "甲", "text": "然后……"}]}}
+        tmp = tempfile.mkdtemp()
+        try:
+            save_story(os.path.join(tmp, "books", "ct", "story"), meta, scenes)
+            lib = Library(os.path.join(tmp, "books"), os.path.join(tmp, "play"), demo=False)
+            r0 = lib.act("ct", "me", "new")
+            self.assertEqual([l.get("mark") for l in r0["state"]["lines"]], ["◇"])
+            self.assertTrue(lib.act("ct", "me", "click").get("clicked"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
