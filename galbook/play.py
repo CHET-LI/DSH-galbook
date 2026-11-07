@@ -11,8 +11,8 @@ from .ir import load_story, StoryError
 from .importers import legacy
 from .store import Store, StoreError
 
-READONLY = ("status", "saves", "log", "profile", "gallery")
-ACTIONS = ("new", "next", "choose", "save", "load", "saves", "rewind", "log", "status", "profile", "persona", "gallery", "click")
+READONLY = ("status", "saves", "log", "profile", "gallery", "look")
+ACTIONS = ("new", "next", "choose", "save", "load", "saves", "rewind", "log", "status", "profile", "persona", "gallery", "click", "look")
 SLUG_OK = lambda s: bool(s) and "/" not in s and "\\" not in s and not s.startswith(".")
 
 
@@ -105,7 +105,9 @@ class Library(object):
         n = max(1, min(int(n or 20), 200))
         before_end = st.get("ended")
         st.pop("_click", None)          # 上一批的「可点」只在那一批有效（原作的点击也只在那一句上）
+        vis_before = engine._vis_brief(st["vis"])     # 读这一批之前画面是什么样（文本接口据此只在变化时报〔画面〕）
         r = self._advance_clicks(story, S, st, n, bool(skip_read))
+        r["vis_before"] = vis_before
         S.touch_run()
         S.profile["stats"]["lines"] = S.profile["stats"].get("lines", 0) + len(r["lines"])
         if r.get("choice") and not (st.get("_autosaved_at") == [st["scene"], st["pc"], st["turn"]]):
@@ -113,7 +115,10 @@ class Library(object):
             S.save_slot("auto", self._meta(story, st, "到选项自动存"))
         if r.get("cg_seen"):
             got = S.profile.setdefault("cg", [])
-            got.extend(c for c in dict.fromkeys(r["cg_seen"]) if c not in got)
+            new_cg = [c for c in dict.fromkeys(r["cg_seen"]) if c not in got]
+            if new_cg:
+                r["cg_new"] = new_cg                  # 这个 agent 第一次看到的 CG（img=1 时只给这些附图）
+            got.extend(new_cg)
         self._decorate(story, S, st, r)
         if st.get("ended") and not before_end:
             e = st["ended"]
@@ -199,6 +204,33 @@ class Library(object):
         S.set_run(new)
         S.profile["stats"]["clicks"] = S.profile["stats"].get("clicks", 0) + 1
         return {"ok": True, "msg": "点了一下。", "clicked": True, "where": engine.where(story, new)}
+
+    def _a_look(self, story, S, bg=None, **_):
+        """看一眼现在的画面（只读）：有 CG 就是 CG；否则是在场的立绘（每人一张，带位置和表情码）；
+        没人在场或 bg=1 时加上背景。返回要看的图的列表，文本接口给地址，MCP 直接给图。"""
+        st = self._need_run(S)
+        v = engine._vis_brief(st["vis"])
+        return {"ok": True, "vis": v, "look": screen_picks(v, with_bg=str(bg).lower() in ("1", "true", "yes")),
+                "where": engine.where(story, st)}
+
+    def image_path(self, slug, rel):
+        """书里的图的绝对路径；只认 assets/ 下面、真实存在、不越界的文件，否则 None。"""
+        if not rel or not SLUG_OK(slug) or not str(rel).startswith("assets/"):
+            return None
+        base = os.path.realpath(os.path.join(self.books_dir, slug, "assets"))
+        p = os.path.realpath(os.path.join(self.books_dir, slug, rel))
+        if not p.startswith(base + os.sep) or not os.path.isfile(p):
+            return None
+        return p
+
+    def has_images(self, slug):
+        """书里有没有图（决定〔画面〕行默认开不开）。"""
+        d = os.path.join(self.books_dir, slug, "assets")
+        try:
+            with os.scandir(d) as it:
+                return any(True for _ in it)
+        except OSError:
+            return False
 
     def _a_choose(self, story, S, i=None, reason="", **_):
         st = self._need_run(S)
@@ -342,6 +374,28 @@ class Library(object):
         return {"title": sc.title if sc else "", "turn": st.get("turn"), "note": (note or "")[:120],
                 "preview": ((last.get("who") + "：") if last.get("who") else "") + engine.plain(last.get("text", ""))[:60],
                 "pending": bool(st.get("pending"))}
+
+
+def face_code(sp):
+    """立绘的表情码：文件名去掉角色名和扩展名（例 雫_中_02_01_01.png → 中_02_01_01）。
+    不是表情的名字，但同一个码就是同一张脸；配 look 看一眼就知道是什么表情。"""
+    b = os.path.splitext(os.path.basename(str(sp.get("img") or "")))[0]
+    nm = sp.get("name") or ""
+    if nm and b.startswith(nm):
+        b = b[len(nm):].lstrip("_- .")
+    return b
+
+
+def screen_picks(v, with_bg=False):
+    """一屏「值得看」的图：[(说明, 路径)]。CG 盖住立绘，所以有 CG 只给 CG。"""
+    v = v or {}
+    if v.get("cg"):
+        return [("CG", v["cg"])]
+    out = [("%s:%s(%s)" % (s.get("name", "?"), s.get("pos") or "center", face_code(s)), s["img"])
+           for s in v.get("sprites") or [] if s.get("img")]
+    if v.get("bg") and (with_bg or not out):
+        out.insert(0, ("bg", v["bg"]))
+    return out
 
 
 def has_clicks(story):

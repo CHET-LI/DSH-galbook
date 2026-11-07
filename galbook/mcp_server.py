@@ -8,6 +8,7 @@
 多个 agent 可以各起一个 MCP 进程（不同 --agent），共用同一个 --data 目录；存储层有文件锁，互不干扰。
 也可以不起进程：python3 -m galbook serve 自带 Streamable HTTP 的 MCP 端点 POST /mcp?book=…&agent=…（见 server.py）。"""
 import argparse
+import base64
 import os
 import json
 import sys
@@ -15,7 +16,7 @@ import traceback
 
 from . import VERSION
 from .play import Library
-from .tools import mcp_tools, call_tool
+from .tools import mcp_tools, call_tool, call_tool_rich
 from .i18n import msg
 
 PROTO = "2024-11-05"
@@ -46,8 +47,12 @@ def handle(lib, req, book=None, agent=None, lang="zh", force_agent=None):
                     if args.get("agent") not in (None, "", force_agent):
                         raise ValueError("这个令牌只能用名字 %s / this token can only play as %s" % (force_agent, force_agent))
                     args["agent"] = force_agent
-                text = call_tool(lib, params.get("name"), args, book, agent, lang)
-                res = {"content": [{"type": "text", "text": text}], "isError": False}
+                text, images = call_tool_rich(lib, params.get("name"), args, book, agent, lang)
+                content = [{"type": "text", "text": text}]
+                for lb, mime, data in images:          # 图和文在同一条消息里（MCP image content）
+                    content.append({"type": "text", "text": "〔图〕" + lb})
+                    content.append({"type": "image", "data": base64.b64encode(data).decode("ascii"), "mimeType": mime})
+                res = {"content": content, "isError": False}
             except (ValueError, KeyError) as e:
                 res = {"content": [{"type": "text", "text": msg(lang, str(e))}], "isError": True}
         else:

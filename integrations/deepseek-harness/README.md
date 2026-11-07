@@ -12,7 +12,7 @@ dsh web --patch integrations/deepseek-harness/galbook.patch.yml            # 临
 # 常驻：把 insert 那段合进 $DSH_HOME/profiles/<profile>/cordis.patch.yml
 ```
 
-工具会以 `mcp__galbook__galbook_next` 这样的名字出现（共 15 个）。`--book` / `--agent` 是默认值，模型也可以在参数里换。
+工具会以 `mcp__galbook__galbook_next` 这样的名字出现（共 16 个）。`--book` / `--agent` 是默认值，模型也可以在参数里换。
 
 Windows 注意：`command` 写 `python`（或 `py`）；路径用正斜杠或双反斜杠；`env` 里保留 `PYTHONIOENCODING: utf-8`。
 

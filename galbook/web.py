@@ -12,17 +12,17 @@ import json
 import os
 import re
 import traceback
-from urllib.parse import parse_qs, unquote
+from urllib.parse import parse_qs, unquote, quote
 
 from . import engine, VERSION
 from .i18n import t, msg
-from .play import Library, ACTIONS
+from .play import Library, ACTIONS, face_code, screen_picks
 from .ir import StoryError
 from .store import StoreError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ERRS = (engine.PlayError, StoryError, StoreError, ValueError)
-KW = ("n", "i", "steps", "slot", "note", "reason", "h", "mode", "hints", "lang", "text")
+KW = ("n", "i", "steps", "slot", "note", "reason", "h", "mode", "hints", "lang", "text", "bg")
 
 HELP = {"zh": """galbook —— 像人一样玩 galgame（%s）
 每个 agent 用自己的名字玩，各自的进度、存档、通关记录互不影响，可以很多个同时玩。
@@ -35,7 +35,10 @@ HELP = {"zh": """galbook —— 像人一样玩 galgame（%s）
         &mode=ironman        铁人模式：不能存读档和回溯，选了就认
         &hints=1             选项旁标「选过」「新内容」
         &lang=en             框架文字用英文
-  /play/t/<书>/<你的名字>?do=next&n=20              往下读 n 句（最多 200）；&skip=1 跳过读过的；&img=1 带画面
+  /play/t/<书>/<你的名字>?do=next&n=20              往下读 n 句（最多 200）；&skip=1 跳过读过的
+        画面一变就多一行〔画面〕bg=… | sp=名字:位置(表情码)（书里有图时默认开，&vis=0 关）；路径拼成 /b/<书>/<路径> 就是图
+        &img=1               只在「第一次见到的 CG」和「结局那一屏」附图（MCP 直接给图，这里给地址）
+  /play/t/<书>/<你的名字>?do=look                   看一眼现在的画面：CG，或在场每个人的立绘（&bg=1 连背景）
   /play/t/<书>/<你的名字>?do=choose&i=2&reason=…    选第 2 个，reason 写一句你为什么这么选（i=random 随机）
   /play/t/<书>/<你的名字>?do=save&slot=3&note=…     存档（quick 或 1-99；到选项时会自动存 auto）
   /play/t/<书>/<你的名字>?do=load&slot=3            读档（auto / quick / 1-99）
@@ -61,7 +64,11 @@ Plain-text API (GET, one action per request):
         &mode=ironman        no saving/loading/rewinding — choices are final
         &hints=1             mark options "picked before" / "new"
         &lang=en             English UI text
-  /play/t/<book>/<name>?do=next&n=20               read n lines (max 200); &skip=1 skip read lines; &img=1 show visuals
+  /play/t/<book>/<name>?do=next&n=20               read n lines (max 200); &skip=1 skip read lines
+        a [screen] bg=… | sp=name:pos(face code) line whenever the picture changes (on by default if the book has images; &vis=0 off);
+        an image URL is /b/<book>/<path>
+        &img=1               attach images only for a CG you see for the first time and for the ending screen
+  /play/t/<book>/<name>?do=look                    look at the current screen: the CG, or each character on stage (&bg=1 adds the background)
   /play/t/<book>/<name>?do=choose&i=2&reason=…     pick option 2 and say why (i=random for random)
   /play/t/<book>/<name>?do=save&slot=3&note=…      save (quick or 1-99; slot auto is written at every choice)
   /play/t/<book>/<name>?do=load&slot=3             load (auto / quick / 1-99)
@@ -142,12 +149,13 @@ class App(object):
         if do not in ACTIONS:
             raise engine.PlayError("do 只能是：" + " ".join(ACTIONS))
         img = str(q.get("img", "")) in ("1", "true")
+        vis = want_vis(self.lib, book, q.get("vis"))
         kw = self._kw(q)
         if do != "new":
             kw.pop("lang", None)
         r = self.lib.act(book, agent, do, **kw)
         lg = lang or ((r.get("opts") or {}).get("lang")) or self._run_lang(book, agent) or self.default_lang
-        return self._text(200, render_text(r, do, img, book, agent, lg))
+        return self._text(200, render_text(r, do, img, book, agent, lg, vis=vis))
 
     def _run_lang(self, book, agent):
         try:
@@ -170,20 +178,58 @@ class App(object):
             return 200, ct, f.read()
 
 
-def _img(p):
-    return os.path.splitext(os.path.basename(p))[0] if p else None
+def want_vis(lib, book, v):
+    """〔画面〕行开不开：显式 vis=1/0 优先；没说就看书里有没有图（没图的书不白占 token）。"""
+    if v not in (None, ""):
+        return str(v).lower() in ("1", "true", "yes", "on")
+    try:
+        return lib.has_images(book)
+    except Exception:  # noqa
+        return False
 
 
-def _vis_text(v, lang):
-    bits = []
+def _vsig(v):
+    v = v or {}
     if v.get("cg"):
-        bits.append(t(lang, "vis_cg") + _img(v["cg"]))
-    elif v.get("bg"):
-        bits.append(t(lang, "vis_bg") + _img(v["bg"]))
-    sp = [s.get("name", "") for s in v.get("sprites") or []]
+        return ("cg", v["cg"])
+    return ("bg", v.get("bg"), tuple((s.get("name"), s.get("img"), s.get("pos")) for s in v.get("sprites") or []))
+
+
+def vis_line(v, lang="zh"):
+    """〔画面〕bg=… | sp=雫:center(中_02_01_01),琥珀:right(…)；有 CG 时只写 cg（立绘被盖住）。路径拼 /b/<书>/<路径> 就是图。"""
+    v = v or {}
+    hd = "[screen] " if lang == "en" else "〔画面〕"
+    if v.get("cg"):
+        return hd + "cg=" + v["cg"]
+    bits = []
+    if v.get("bg"):
+        bits.append("bg=" + v["bg"])
+    sp = [s for s in v.get("sprites") or [] if s.get("img") or s.get("name")]
     if sp:
-        bits.append(t(lang, "vis_on") + t(lang, "sep").join(sp))
-    return "〔" + "｜".join(bits) + "〕" if bits else ""
+        bits.append("sp=" + ",".join("%s:%s(%s)" % (s.get("name", "?"), s.get("pos") or "center", face_code(s)) for s in sp))
+    return hd + (" | ".join(bits) if bits else ("(empty)" if lang == "en" else "（空）"))
+
+
+def img_url(book, path):
+    return "/b/%s/%s" % (quote(book, safe=""), quote(path, safe="/"))
+
+
+def image_picks(r, do, cap=4):
+    """这次该附哪些图：[(说明, 路径)]。do=look → 当前画面；img=1 时只在「第一次见到的 CG」和「结局那一屏」给。"""
+    if do == "look":
+        picks = list(r.get("look") or [])
+    else:
+        st = r.get("state") or {}
+        picks = [("CG（第一次）", c) for c in st.get("cg_new") or []]
+        e = st.get("ended") or {}
+        if e.get("kind") == "ending":
+            picks += [("结局：" + lb, p) for lb, p in screen_picks(st.get("vis"), with_bg=True)]
+    out, seen = [], set()
+    for lb, p in picks:
+        if p and p not in seen:
+            seen.add(p)
+            out.append((lb, p))
+    return out[:cap]
 
 
 def _say(x, lang="zh"):
@@ -208,8 +254,11 @@ def restyle(text, book, agent, style):
     return re.sub(r"(?<=[\s（(])&(\w+=)", r"\1", text)
 
 
-def render_text(r, do, img, book, agent, lang="zh"):
-    """把一次操作的结果写成给 agent 看的纯文本（一句一行，最省 token）。"""
+def render_text(r, do, img, book, agent, lang="zh", vis=None):
+    """把一次操作的结果写成给 agent 看的纯文本（一句一行，最省 token）。
+    vis：画面变了才加一行〔画面〕（None = 跟 img 走，兼容旧调用）；img：第一次见到的 CG / 结局那屏 / look 给图的地址。"""
+    if vis is None:
+        vis = bool(img)
     L = []
     base = "/play/t/%s/%s?do=" % (book, agent)
     st = r.get("state")
@@ -221,6 +270,11 @@ def render_text(r, do, img, book, agent, lang="zh"):
         c = r["chosen"]
         L.append(t(lang, "you_chose", text=c["text"], i=c["i"], of=c.get("of") or "?"))
         L.append(t(lang, "cont", base=base))
+        return "\n".join(L) + "\n"
+    if do == "look":
+        L.append(vis_line(r.get("vis"), lang))
+        for lb, p in image_picks(r, do):
+            L.append(("[image] %s %s" if lang == "en" else "〔图〕%s %s") % (lb, img_url(book, p)))
         return "\n".join(L) + "\n"
     if do == "persona":
         p = r.get("persona") or ""
@@ -275,18 +329,24 @@ def render_text(r, do, img, book, agent, lang="zh"):
     if st:
         w = st["where"]
         L.append(t(lang, "line_hdr", title=w.get("title", ""), turn=w.get("turn", 0)))
-        if img and not st["lines"]:
-            v = _vis_text(st.get("vis") or {}, lang)
-            if v:
-                L.append(v)
-        last_vis = None
+        prev = st.get("vis_before")
+        if vis and not st["lines"] and (prev is None or _vsig(st.get("vis")) != _vsig(prev)):
+            if prev is not None or _vsig(st.get("vis")) != _vsig({}):
+                L.append(vis_line(st.get("vis"), lang))
+            prev = st.get("vis")
         for ln in st["lines"]:
-            if img and ln.get("vis"):
-                v = _vis_text(ln["vis"], lang)
-                if v and v != last_vis:
-                    L.append(v)
-                    last_vis = v
+            v = ln.get("vis")
+            if vis and v is not None and (prev is None or _vsig(v) != _vsig(prev)):
+                if prev is not None or _vsig(v) != _vsig({}):
+                    L.append(vis_line(v, lang))
+                prev = v
             L.append(_say(ln, lang) + (" " + ln["mark"] if ln.get("mark") else ""))
+        if vis and st["lines"] and (st.get("ended") or st.get("choice")) and st.get("vis") is not None \
+                and _vsig(st["vis"]) != _vsig(prev):
+            L.append(vis_line(st["vis"], lang))              # 最后一句之后画面又变了（结局 CG 常这样）
+        if img:
+            for lb, p in image_picks(r, do):
+                L.append(("[image] %s %s" if lang == "en" else "〔图〕%s %s") % (lb, img_url(book, p)))
         if st.get("skipped"):
             L.append(t(lang, "skipped", n=st["skipped"]))
         for e in st.get("events") or []:

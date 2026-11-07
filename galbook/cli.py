@@ -4,7 +4,7 @@
 import sys
 
 from .play import Library
-from .web import render_text
+from .web import render_text, want_vis
 
 
 def main(argv=None):
@@ -18,10 +18,12 @@ def main(argv=None):
         kw["skip_read"] = True
     img = kw.pop("img", "") in ("1", "true")
     lang = kw.get("lang") if do == "new" else kw.pop("lang", None)
+    vis = kw.pop("vis", None)
     lib = Library(books, data)
+    vis = want_vis(lib, book, vis)
     r = lib.act(book, agent, do, **kw)
     lang = lang or ((r.get("opts") or (lib.store.peek_run(book, agent) or {}).get("opts") or {}).get("lang")) or "zh"
-    sys.stdout.write(render_text(r, do, img, book, agent, lang))
+    sys.stdout.write(render_text(r, do, img, book, agent, lang, vis=vis))
     return 0
 
 

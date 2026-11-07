@@ -585,3 +585,91 @@ class TestNoDemo(unittest.TestCase):
             self.assertTrue(lib.act("ct", "me", "click").get("clicked"))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+def _bmp(w, h, rgb):
+    import struct as _s
+    stride = (w * 3 + 3) // 4 * 4
+    row = bytes(rgb[::-1]) * w + b"\0" * (stride - w * 3)
+    px = row * h
+    return (b"BM" + _s.pack("<IHHI", 54 + len(px), 0, 0, 54) +
+            _s.pack("<IiiHHIIiiII", 40, w, h, 1, 24, 0, len(px), 0, 0, 0, 0) + px)
+
+
+class TestPictures(unittest.TestCase):
+    """〔画面〕行只在变化时出；img=1 只给第一次见到的 CG 和结局那屏；look 看当前画面；MCP 直接给 image content。"""
+
+    def setUp(self):
+        from galbook.imaging import _png
+        self.tmp = tempfile.mkdtemp()
+        bk = os.path.join(self.tmp, "books", "p")
+        os.makedirs(os.path.join(bk, "assets"))
+        for fn, b in (("bg.bmp", _bmp(8, 6, (10, 20, 30))), ("cg.bmp", _bmp(8, 6, (200, 0, 0))),
+                      ("雫_中_01_02.png", _png(2, 1, b"\0" + b"\xff\xff\xff" * 2))):
+            with open(os.path.join(bk, "assets", fn), "wb") as f:
+                f.write(b)
+        meta = {"format": "galbook/1", "title": "图", "engine": "test", "mode": "branch", "entry": {"scene": "a"}, "scenes": {}}
+        ops = [{"op": "bg", "img": "assets/bg.bmp"}, {"op": "say", "text": "一"}, {"op": "say", "text": "二"},
+               {"op": "sprite", "name": "雫", "img": "assets/雫_中_01_02.png", "pos": "right"}, {"op": "say", "text": "三"},
+               {"op": "say", "text": "四"}, {"op": "cg", "img": "assets/cg.bmp"}, {"op": "say", "text": "五"},
+               {"op": "end", "name": "结局"}]
+        save_story(os.path.join(bk, "story"), meta, {"a": {"title": "一", "ops": ops}})
+        self.lib = Library(os.path.join(self.tmp, "books"), os.path.join(self.tmp, "data"), demo=False)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _text(self, do, agent="a", **q):
+        from galbook.web import render_text, want_vis
+        img = q.pop("img", False)
+        vis = want_vis(self.lib, "p", q.pop("vis", None))
+        return render_text(self.lib.act("p", agent, do, **q), do, img, "p", agent, "zh", vis=vis)
+
+    def test_vis_line_only_on_change(self):
+        t1 = self._text("new")
+        self.assertIn("〔画面〕bg=assets/bg.bmp", t1)
+        t2 = self._text("next", n=50)
+        lines = t2.splitlines()
+        vl = [x for x in lines if x.startswith("〔画面〕")]
+        self.assertEqual(vl, ["〔画面〕bg=assets/bg.bmp | sp=雫:right(中_01_02)", "〔画面〕cg=assets/cg.bmp"], t2)
+        self.assertLess(lines.index(vl[0]), lines.index("三"))
+        self.assertNotIn("〔图〕", t2)                    # 没开 img 不给图
+
+    def test_vis_off(self):
+        self._text("new", vis="0")
+        self.assertNotIn("〔画面〕", self._text("next", n=50, vis="0"))
+
+    def test_img_first_cg_and_ending(self):
+        self._text("new")
+        t = self._text("next", n=50, img=True)
+        urls = [x for x in t.splitlines() if x.startswith("〔图〕")]
+        self.assertEqual(urls, ["〔图〕CG（第一次） /b/p/assets/cg.bmp"], t)     # 结局那屏也是这张 CG：去重
+        self._text("new")
+        t = self._text("next", n=50, img=True)
+        self.assertEqual([x for x in t.splitlines() if x.startswith("〔图〕")], ["〔图〕结局：CG /b/p/assets/cg.bmp"])
+
+    def test_look_and_mcp_images(self):
+        import base64
+        from galbook.mcp_server import handle
+        from galbook.imaging import png_size
+        self._text("new")
+        self._text("next", n=3)
+        t = self._text("look")
+        self.assertIn("〔图〕雫:right(中_01_02) /b/p/assets/%E9%9B%AB_%E4%B8%AD_01_02.png", t)
+        r = handle(self.lib, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                              "params": {"name": "galbook_look", "arguments": {"book": "p", "agent": "a", "bg": True}}}, None, None, "zh")
+        imgs = [c for c in r["result"]["content"] if c["type"] == "image"]
+        self.assertEqual([c["mimeType"] for c in imgs], ["image/png", "image/png"])
+        self.assertEqual(png_size(base64.b64decode(imgs[0]["data"])), (8, 6))     # BMP 背景转成了 PNG
+        r = handle(self.lib, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                              "params": {"name": "galbook_next", "arguments": {"book": "p", "agent": "a", "n": 50}}}, None, None, "zh")
+        self.assertFalse([c for c in r["result"]["content"] if c["type"] == "image"])   # 不开 img 不发图
+
+    def test_bmp_to_png_pixels(self):
+        import zlib
+        from galbook.imaging import bmp_to_png
+        png = bmp_to_png(_bmp(3, 2, (1, 2, 3)))
+        i = png.index(b"IDAT")
+        n = int.from_bytes(png[i - 4:i], "big")
+        raw = zlib.decompress(png[i + 4:i + 4 + n])
+        self.assertEqual(raw, (b"\0" + b"\x01\x02\x03" * 3) * 2)
+        self.assertEqual(len(bmp_to_png(_bmp(3000, 4, (9, 9, 9)), max_side=1000)) > 0, True)

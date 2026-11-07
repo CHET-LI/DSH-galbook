@@ -1,6 +1,6 @@
 # galbook
 
-**让 agent 像人一样玩 galgame / 视觉小说**：一句一句读剧情，遇到选项自己选并写理由，存档、读档、回到上个选项、多周目解锁隐藏线。很多 agent 可以同时玩同一本书，各自的进度互不干扰。
+**让 agent 像人一样玩 galgame / 视觉小说**：一句一句读剧情，遇到选项自己选并写理由，存档、读档、回到上个选项、多周目解锁隐藏线。**画面它也能看见**——换场景时告诉你背景换到哪、谁站在哪一侧、什么表情；第一次见到某张 CG，图会跟着文字一起给。想知道此刻屏幕上是什么，`galbook_look` 看一眼就行。很多 agent 可以同时玩同一本书，各自的进度互不干扰。
 
 [English](README.en.md) · 纯 Python 标准库，没有依赖 · MIT
 
@@ -15,9 +15,9 @@
 
 完整字段和协议在 [docs/AGENTS.md](docs/AGENTS.md)；OpenAI function-calling 的工具定义用 `python3 -m galbook tools` 导出。
 
-> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galgame-galbook`，重启即可（包在根目录声明了组合包，多出 15 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.4.tgz`，见 [dsh-plugin](dsh-plugin/)。
+> **用 DeepSeek Harness（dsh）？** 插件面板 → 安装 → 来源填 `github:CHET-LI/DSH-galgame-galbook`，重启即可（包在根目录声明了组合包，多出 16 个 `galbook_*` 工具）。连不上 GitHub 就用本地目录或 `galbook-1.2.5.tgz`，见 [dsh-plugin](dsh-plugin/)。
 
-> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) 有 `galbook-1.2.3.zip`（源码）、`galbook-1.2.3.tar.gz`（Linux 免解压乱码）、`galbook-1.2.4.tgz`（npm 包）。
+> **要离线包？** [Release](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) 有 `galbook-1.2.3.zip`（源码）、`galbook-1.2.3.tar.gz`（Linux 免解压乱码）、`galbook-1.2.5.tgz`（npm 包）。
 
 - 带网页：看每个 agent 玩到哪、选了什么、为什么选；人也能自己玩
 - 导入器：QLIE、吉里吉里 KAG / TyranoScript、Ren'Py、NScripter、自带的 `.gal` 手写格式；另外能吃 VNTextPatch 等工具导出的文本（20 多种引擎，只能线性读），还能写插件接新引擎
@@ -76,7 +76,7 @@ python3 examples/party.py --book fog-harbor
 | 收集 | `do=gallery` | 结局 / 路线 / CG / 已读进度 |
 | 像不像人 | `do=profile` | 选前读了几句、理由率、思考时间、是不是总选第一个 |
 | 跳过已读 | `next&skip=1` | 二周目快进到没读过的地方 |
-| 图片 | `next&img=1` | 附上当前背景/立绘/CG 的地址，给多模态 agent |
+| 画面 | 默认（书里有图时）/ `next&img=1` / `do=look` | 画面一变多一行 `〔画面〕bg=… \| sp=雫:center(表情码)`；`img=1` 只在第一次见到的 CG 和结局那屏附图；`look` 看当前画面。MCP 直接返回图片（BMP 自动转 PNG），文本接口给 `/b/<书>/<路径>` |
 
 ## 接到你的 agent
 

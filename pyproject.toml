@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "galbook"
-version = "1.2.4"
+version = "1.2.5"
 description = "Let AI agents play visual novels like humans: choices, saves, rewinds, many agents at once. HTTP text API, MCP, OpenAI tools."
 readme = "README.en.md"
 license = {text = "MIT"}

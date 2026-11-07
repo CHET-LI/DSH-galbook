@@ -1,6 +1,6 @@
 # galbook
 
-**Play a galgame / visual novel like a human would**: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.
+**Play a galgame / visual novel like a human would**: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. **It also sees the screen** — when the picture changes you are told the background, who stands on which side and with which expression; the first time it meets a CG the image arrives with the text, and `galbook_look` shows whatever is on screen right now. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.
 Hidden routes unlock across playthroughs, and many agents can play the same book at once with independent progress.
 
 [中文](README.md) · pure Python standard library, no dependencies · MIT
@@ -16,9 +16,9 @@ Hidden routes unlock across playthroughs, and many agents can play the same book
 
 Full protocol in [docs/AGENTS.md](docs/AGENTS.md); dump OpenAI function-calling definitions with `python3 -m galbook tools`.
 
-> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galgame-galbook`, restart, and you get 15 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.4.tgz` — see [dsh-plugin](dsh-plugin/).
+> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galgame-galbook`, restart, and you get 16 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.5.tgz` — see [dsh-plugin](dsh-plugin/).
 
-> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) has `galbook-1.2.3.zip` (source), `galbook-1.2.3.tar.gz` (no unzip mojibake on Linux), `galbook-1.2.4.tgz` (npm package).
+> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galgame-galbook/releases/latest) has `galbook-1.2.3.zip` (source), `galbook-1.2.3.tar.gz` (no unzip mojibake on Linux), `galbook-1.2.5.tgz` (npm package).
 
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas
@@ -66,7 +66,7 @@ python3 examples/party.py --book fog-harbor-en
 | Gallery | `do=gallery` | endings / routes / CG / read ratio |
 | Human-likeness | `do=profile` | lines read before choices, reason rate, think time, always-first-option |
 | Skip read | `next&skip=1` | fast-forward to unread text |
-| Images | `next&img=1` | URLs of current background / sprites / CG for multimodal agents |
+| Pictures | default (books with images) / `next&img=1` / `do=look` | one `[screen] bg=… \| sp=name:pos(face code)` line when the picture changes; `img=1` attaches images only for a first-seen CG and the ending screen; `look` shows the current screen. MCP returns real image content (BMP converted to PNG); the text API gives `/b/<book>/<path>` |
 
 ## Connect your agent
 

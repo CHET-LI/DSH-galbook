@@ -6,7 +6,7 @@
 import json
 
 from .play import Library  # noqa: F401  (类型提示用)
-from .web import render_text, restyle, HELP
+from .web import render_text, restyle, HELP, want_vis, image_picks
 from .i18n import msg
 from . import VERSION
 
@@ -25,7 +25,8 @@ TOOLS = [
     ("galbook_next", "next", "Read the next n lines; stops at a choice or ending. / 往下读", {
         "n": {"type": "integer", "minimum": 1, "maximum": 200, "description": "lines to read (default 20)"},
         "skip_read": {"type": "boolean", "description": "fast-forward lines you have already read"},
-        "img": {"type": "boolean", "description": "include background/sprite/CG names"}}),
+        "img": {"type": "boolean", "description": "attach images, but only for a CG you see for the first time and the ending screen / 只在第一次见到的 CG 和结局那屏附图"},
+        "vis": {"type": "boolean", "description": "one [screen] line when the picture changes (default: on if the book has images)"}}),
     ("galbook_choose", "choose", "Pick an option at a choice and say why. / 选选项并写理由", {
         "i": {"type": ["integer", "string"], "description": "option number from 1, or \"random\""},
         "reason": {"type": "string", "description": "one sentence: why your persona picks this"}}),
@@ -43,6 +44,8 @@ TOOLS = [
     ("galbook_gallery", "gallery", "Collection progress: endings, routes, CG, read ratio. / 收集进度", {}),
     ("galbook_profile", "profile", "Stats and human-likeness numbers. / 记录", {}),
     ("galbook_click", "click", "Click the screen. / 点一下画面", {}),
+    ("galbook_look", "look", "Look at the current screen: the CG, or each character on stage (position + face code), as images. / 看一眼现在的画面", {
+        "bg": {"type": "boolean", "description": "also include the background"}}),
 ]
 
 
@@ -63,19 +66,29 @@ def openai_tools():
 
 def call_tool(lib, name, args, default_book=None, default_agent=None, lang="zh", style="tool", lang_override=None):
     """执行一个工具，返回纯文本。style：提示里的下一步写成 tool（默认）/ cli / http 形式。"""
+    return call_tool_rich(lib, name, args, default_book, default_agent, lang, style, lang_override, with_images=False)[0]
+
+
+def call_tool_rich(lib, name, args, default_book=None, default_agent=None, lang="zh", style="tool", lang_override=None,
+                   with_images=True, max_side=1280):
+    """同 call_tool，另外返回要附的图：[(说明, mime, bytes)]（MCP 用 image content 直接发）。
+    只在 look、或 img=1 时「第一次见到的 CG / 结局那屏」才有图；转不了的图（SVG 等）在文本里给路径。"""
     spec = next((x for x in TOOLS if x[0] == name), None)
     if spec is None:
         raise ValueError("unknown tool %s" % name)
     args = dict(args or {})
     if name == "galbook_books":
-        return json.dumps(lib.books(), ensure_ascii=False, indent=1)
+        return json.dumps(lib.books(), ensure_ascii=False, indent=1), []
     if name == "galbook_help":
-        return HELP.get(lang, HELP["zh"]) % VERSION
+        return HELP.get(lang, HELP["zh"]) % VERSION, []
     book = args.pop("book", None) or default_book
     agent = args.pop("agent", None) or default_agent
     if not book or not agent:
         raise ValueError("需要 book 和 agent / book and agent are required")
-    img = bool(args.pop("img", False))
+    img = args.pop("img", False) in (True, 1, "1", "true")
+    vis = want_vis(lib, book, args.pop("vis", None))
+    if "bg" in args:
+        args["bg"] = "1" if args["bg"] in (True, "1", "true", 1) else "0"
     if "hints" in args:
         args["hints"] = "1" if args["hints"] in (True, "1", "true", 1) else "0"
     if args.pop("skip_read", False):
@@ -84,7 +97,21 @@ def call_tool(lib, name, args, default_book=None, default_agent=None, lang="zh",
     r = lib.act(book, agent, action, **args)
     run = lib.store.peek_run(book, agent) or {}
     lg = lang_override or ((r.get("opts") or run.get("opts") or {}).get("lang")) or lang
-    return restyle(render_text(r, action, img, book, agent, lg), book, agent, style)
+    text = restyle(render_text(r, action, img, book, agent, lg, vis=vis), book, agent, style)
+    images = []
+    if with_images and (img or action == "look"):
+        from .imaging import load_for_model
+        notes = []
+        for lb, rel in image_picks(r, action):
+            p = lib.image_path(book, rel)
+            mime, data = load_for_model(p, max_side) if p else (None, "找不到文件 / file not found")
+            if mime:
+                images.append((lb, mime, data))
+            else:
+                notes.append("（%s：%s → %s）" % (lb, data, rel))
+        if notes:
+            text += "\n".join(notes) + "\n"
+    return text, images
 
 
 def main(argv=None):
@@ -96,4 +123,4 @@ def main(argv=None):
     return 0
 
 
-__all__ = ["TOOLS", "mcp_tools", "openai_tools", "call_tool", "msg"]
+__all__ = ["TOOLS", "mcp_tools", "openai_tools", "call_tool", "call_tool_rich", "msg"]
