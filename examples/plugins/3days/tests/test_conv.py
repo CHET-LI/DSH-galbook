@@ -79,6 +79,42 @@ class T(unittest.TestCase):
         self.assertEqual(texts[:3], ["我决定一个人。", "走了以后。", "一个人的时候。"])
         self.assertEqual([o["text"] for o in r["choice"]["options"]], ["甲", "乙"])
 
+    def test_clock_click(self):            # .custom ＤＣ－０１ 記憶Ｍ → 前一句台词上挂 click；.if ＤＣ－０１ 的隐藏选项不动
+        says = [o for o in self.ops("s-004") if o["op"] == "say"]
+        self.assertNotIn("click", says[0])
+        self.assertEqual(says[1]["text"], "時計の針が止まった。")
+        self.assertEqual(says[1]["click"], {"id": "ＤＣ－01", "set": "f.ＤＣ－01 = 1", "if": "(f.記憶Ｍ) && (!(f.ＤＣ－01))"})
+        ch = [o for o in self.ops("s-004") if o["op"] == "choice"][0]
+        self.assertTrue(all(o.get("if") == "f.ＤＣ－01" for o in ch["options"]), ch)   # 同一个变量名（全角数字统一）
+        self.assertEqual(self.meta["stats"]["clicks"], 1)
+        self.assertEqual(self.meta["stats"]["ignored"].get(".custom"), 1)            # 不带参数的照旧忽略
+
+    def test_clock_click_play(self):
+        from galbook.play import Library
+        import shutil
+        tmp = tempfile.mkdtemp()
+        try:
+            save_story(os.path.join(tmp, "books", "d", "story"), dict(self.meta, entry={"scene": "s-004"}), self.scenes)
+            lib = Library(os.path.join(tmp, "books"), os.path.join(tmp, "data"))
+            for mem, hidden in ((0, False), (1, True)):
+                lib.act("d", "p%d" % mem, "new")
+                st = lib.store.peek_run("d", "p%d" % mem)
+                if mem:          # 模拟「之前那一轮记住了」：直接写进这一局的旗
+                    with lib.store.session("d", "p1") as S:
+                        S.run["f"]["記憶Ｍ"] = 1
+                        S.touch_run()
+                r = lib.act("d", "p%d" % mem, "next", n=50)
+                marks = [ln.get("mark") for ln in r["state"]["lines"]]
+                self.assertEqual("◇" in marks, hidden, marks)
+                self.assertNotIn("choice", r["state"])               # 不点：直接走默认 .load
+                c = lib.act("d", "p%d" % mem, "click")
+                self.assertEqual(c["clicked"], hidden)
+                if hidden:
+                    r = lib.act("d", "p1", "next", n=50)
+                    self.assertEqual([o["text"] for o in r["state"]["choice"]["options"]], ["戻る", "進む"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

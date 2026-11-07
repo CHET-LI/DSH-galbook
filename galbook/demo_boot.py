@@ -7,11 +7,26 @@ import os
 import shutil
 
 
+def demo_enabled():
+    """GALBOOK_NO_DEMO=1/true/yes → 不自动装演示书。"""
+    return os.environ.get("GALBOOK_NO_DEMO", "").strip().lower() not in ("1", "true", "yes", "on")
+
+
+def no_demo_flag(argv):
+    """从参数里摘掉 --no-demo；有的话设 GALBOOK_NO_DEMO=1（各入口共用）。返回剩下的参数。"""
+    argv = list(argv)
+    if "--no-demo" in argv:
+        argv = [x for x in argv if x != "--no-demo"]
+        os.environ["GALBOOK_NO_DEMO"] = "1"
+    return argv
+
+
 def empty(books_dir):
     if not os.path.isdir(books_dir):
         return True
     try:
-        return not any(os.scandir(books_dir))
+        with os.scandir(books_dir) as it:
+            return not any(it)
     except OSError:
         return True
 

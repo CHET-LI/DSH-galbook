@@ -177,7 +177,10 @@ def main(argv=None):
     ap.add_argument("--lang", default="zh", choices=("zh", "en"))
     ap.add_argument("--cors", action="store_true")
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--no-demo", action="store_true", help="books 为空时不自动装演示书（同 GALBOOK_NO_DEMO=1）")
     a = ap.parse_args(argv)
+    if a.no_demo:
+        os.environ["GALBOOK_NO_DEMO"] = "1"
     tokens = json.load(open(a.tokens, encoding="utf-8")) if a.tokens else None
     os.makedirs(a.books, exist_ok=True)
     app = App(a.books, a.data, default_lang=a.lang)

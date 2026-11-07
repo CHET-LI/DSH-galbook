@@ -13,7 +13,7 @@ python -m galbook demo --books books
 python dsh-plugin/install.py
 ```
 
-然后重启 DeepSeek Harness，新建会话问一句「galbook 有哪些工具？」，能看到 14 个就成了。
+然后重启 DeepSeek Harness，新建会话问一句「galbook 有哪些工具？」，能看到 15 个就成了。
 
 ## 它会做什么
 
@@ -42,7 +42,7 @@ python dsh-plugin/install.py --remove           # 卸载
 
 - **Linux 上解压后目录名变乱码**（`уВ╣уВпуГкуГЧуГИ` 这种）：系统的 `unzip` 不认 UTF-8 文件名。用 `python3 -m zipfile -e galbook-1.2.3.zip .`，或直接下 `galbook-1.2.3.tar.gz`
 - **连 GitHub 超时 / 提示「请尝试其他安装来源」**：这台机器到 github.com 不通时，插件面板的链接安装会失败。两个办法：
-  - 用本地安装：把仓库解压到本地，插件面板里选**本地目录**；或下载 `dsh-galbook-1.2.3.tgz`（Release 里），来源填 `file:C:\路径\dsh-galbook-1.2.3.tgz`
+  - 用本地安装：把仓库解压到本地，插件面板里选**本地目录**；或下载 `dsh-galbook-1.2.4.tgz`（Release 里），来源填 `file:C:\路径\dsh-galbook-1.2.4.tgz`
   - 给 dsh 走代理：启动 dsh 前设 `HTTPS_PROXY` / `HTTP_PROXY`（例如 `http://127.0.0.1:7897`），再重试链接安装
 - 看不到工具：确认改的是**当前在用的** profile；dsh 的配置只在启动时读，改完必须整组退出重开
 - `python` 找不到：`python dsh-plugin/install.py --python "C:\Path\python.exe"`

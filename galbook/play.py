@@ -1,33 +1,42 @@
-"""对外的「玩」操作：new / next / choose / save / load / saves / rewind / log / status / profile。
+"""对外的「玩」操作：new / next / choose / save / load / saves / rewind / log / status / profile / click。
 web.py 和命令行都调这里。每个操作在 agent 自己的锁里完成。"""
+import copy
 import os
 import random
 import time
 
 from . import engine
+from .expr import evaluate, assign, ExprError
 from .ir import load_story, StoryError
 from .importers import legacy
 from .store import Store, StoreError
 
 READONLY = ("status", "saves", "log", "profile", "gallery")
-ACTIONS = ("new", "next", "choose", "save", "load", "saves", "rewind", "log", "status", "profile", "persona", "gallery")
+ACTIONS = ("new", "next", "choose", "save", "load", "saves", "rewind", "log", "status", "profile", "persona", "gallery", "click")
 SLUG_OK = lambda s: bool(s) and "/" not in s and "\\" not in s and not s.startswith(".")
 
 
 class Library(object):
-    def __init__(self, books_dir, data_dir):
+    def __init__(self, books_dir, data_dir, demo=None):
         self.books_dir = books_dir
         self.store = Store(data_dir)
         # 装完就能玩：books 不存在或空的时候，自动装自带演示书（npm 包场景）
+        # 关掉：demo=False，或环境变量 GALBOOK_NO_DEMO=1（命令行 --no-demo 就是设这个）
+        if demo is None:
+            from .demo_boot import demo_enabled
+            demo = demo_enabled()
         try:
+            if not demo:
+                raise StopIteration
             import sys as _sys
             from .demo_boot import empty, ensure_demo_books
             if empty(books_dir):
                 n = ensure_demo_books(books_dir)
                 if n:
                     # 只能写 stderr：MCP 走 stdio 时 stdout 是协议通道
-                    print("（books 目录是空的，已自动装入 %d 本演示书）" % n, file=_sys.stderr)
-        except Exception:
+                    print("（books 目录是空的，已自动装入 %d 本演示书；不想要：--no-demo 或 GALBOOK_NO_DEMO=1）" % n,
+                          file=_sys.stderr)
+        except (Exception, StopIteration):
             pass
 
     # ---- 书 ----
@@ -95,7 +104,8 @@ class Library(object):
                     "state": {"lines": [], "ended": st["ended"]}}
         n = max(1, min(int(n or 20), 200))
         before_end = st.get("ended")
-        r = engine.advance(story, st, S.profile["s"], S.profile["seen"], n=n, skip_read=bool(skip_read))
+        st.pop("_click", None)          # 上一批的「可点」只在那一批有效（原作的点击也只在那一句上）
+        r = self._advance_clicks(story, S, st, n, bool(skip_read))
         S.touch_run()
         S.profile["stats"]["lines"] = S.profile["stats"].get("lines", 0) + len(r["lines"])
         if r.get("choice") and not (st.get("_autosaved_at") == [st["scene"], st["pc"], st["turn"]]):
@@ -111,8 +121,88 @@ class Library(object):
                                                                  "t": time.time(), "turn": st.get("turn")})
         return {"ok": True, "state": r, "opts": st.get("opts")}
 
+    # ---- 点击（特殊机制：比如某句台词时点时钟，才会出现隐藏选项）----
+    @staticmethod
+    def _click_of(story, ln):
+        try:
+            return story.scene(ln["scene"]).ops[ln["pc"]].get("click")
+        except Exception:  # noqa
+            return None
+
+    def _advance_clicks(self, story, S, st, n, skip_read):
+        """和 engine.advance 一样推进；剧本里没有 click 时零开销。
+        有 click 的句子且条件成立：那一行带上 mark=◇，并把「刚读完那一句」的状态存进 st["_click"]，
+        之后 do=click 就回到那一刻再点。返回的内容和不带 click 时完全一样（不提前停、不解释）。"""
+        sysv, seen = S.profile["s"], S.profile["seen"]
+        if not has_clicks(story):
+            return engine.advance(story, st, sysv, seen, n=n, skip_read=skip_read)
+        st0, sv0 = copy.deepcopy(st), copy.deepcopy(sysv)
+        r = engine.advance(story, st, sysv, seen, n=n, skip_read=skip_read)
+        cand = [j for j, ln in enumerate(r["lines"]) if not ln.get("folded") and self._click_of(story, ln)]
+        if not cand:
+            return r
+        # 有候选：从推进前的状态逐段重放，在每个候选句停一下，按「那一刻」的变量判断能不能点
+        st.clear(); st.update(st0)
+        sysv.clear(); sysv.update(sv0)
+        parts, done = [], 0
+        for j in cand:
+            seg = engine.advance(story, st, sysv, seen, n=j + 1 - done, skip_read=skip_read)
+            parts.append(seg)
+            done += len(seg["lines"])
+            if done != j + 1 or seg.get("choice") or seg.get("ended"):
+                break                               # 重放和第一次不一致（不该发生）：不标记，照常往下
+            ln = seg["lines"][-1]
+            ck = self._click_of(story, ln)
+            try:
+                ok = evaluate(ck.get("if"), st["f"], sysv)
+            except ExprError:
+                ok = False
+            if ok:
+                ln["mark"] = "◇"
+                snap = {k: v for k, v in st.items() if k != "_click"}
+                st["_click"] = {"scene": ln["scene"], "pc": ln["pc"], "state": copy.deepcopy(snap),
+                                "s": copy.deepcopy(sysv)}
+        if done < n and not (parts and (parts[-1].get("choice") or parts[-1].get("ended"))):
+            parts.append(engine.advance(story, st, sysv, seen, n=n - done, skip_read=skip_read))
+        out = dict(parts[-1])
+        out["lines"] = [ln for p in parts for ln in p["lines"]]
+        out["skipped"] = sum(p.get("skipped", 0) for p in parts)
+        for k in ("cg_seen", "events", "warnings"):
+            v = [x for p in parts for x in (p.get(k) or [])]
+            if v:
+                out[k] = v
+        return out
+
+    def _a_click(self, story, S, **_):
+        st = self._need_run(S)
+        c = st.get("_click")
+        if not c:
+            return {"ok": True, "msg": "点了一下，什么也没发生。", "clicked": False}
+        ck = (story.scene(c["scene"]).ops[c["pc"]].get("click") or {}) if c["scene"] in story.scenes else {}
+        new = c["state"]
+        sysv = S.profile["s"]
+        sysv.clear(); sysv.update(c.get("s") or {})
+        if ck.get("set"):
+            try:
+                assign(ck["set"], new["f"], sysv)
+            except ExprError as e:
+                raise engine.PlayError("点击效果执行失败：%s" % e)
+        cid = str(ck.get("id") or "%s#%s" % (c["scene"], c["pc"]))
+        new["f"]["click_" + cid] = 1                  # 存档里记下：这一局在这里点过
+        found = S.profile.setdefault("clicks", [])    # 跨周目记下：发现过哪些
+        if cid not in found:
+            found.append(cid)
+        g = ck.get("goto") or {}
+        if g:
+            new["scene"], new["pc"] = story.resolve(g.get("scene"), g.get("label"), c["scene"])
+        new.pop("pending", None)
+        S.set_run(new)
+        S.profile["stats"]["clicks"] = S.profile["stats"].get("clicks", 0) + 1
+        return {"ok": True, "msg": "点了一下。", "clicked": True, "where": engine.where(story, new)}
+
     def _a_choose(self, story, S, i=None, reason="", **_):
         st = self._need_run(S)
+        st.pop("_click", None)
         p = st.get("pending")
         if p and str(i).lower() == "random":
             i = random.choice(p["options"])["i"]
@@ -252,6 +342,18 @@ class Library(object):
         return {"title": sc.title if sc else "", "turn": st.get("turn"), "note": (note or "")[:120],
                 "preview": ((last.get("who") + "：") if last.get("who") else "") + engine.plain(last.get("text", ""))[:60],
                 "pending": bool(st.get("pending"))}
+
+
+def has_clicks(story):
+    """剧本里有没有可点的句子（say 上带 click 字段）；结果缓存在 story 上。"""
+    v = getattr(story, "_gb_has_clicks", None)
+    if v is None:
+        v = any(op.get("click") for sc in story.scenes.values() for op in sc.ops)
+        try:
+            story._gb_has_clicks = v
+        except AttributeError:
+            pass
+    return v
 
 
 def humanlike(profile, run):

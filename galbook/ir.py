@@ -190,6 +190,12 @@ def validate(meta, scene_datas):
             w = "%s#%d" % (sid, i)
             if k not in OPS:
                 probs.append("%s: 未知 op %r" % (w, k))
+            if op.get("click") is not None:     # 只校验，不改任何 op 的语义（点击由 play.py 处理）
+                ck = op["click"]
+                if k != "say" or not isinstance(ck, dict) or not (ck.get("set") or ck.get("goto")):
+                    probs.append("%s: click 只能挂在 say 上，且要有 set 或 goto" % w)
+                elif ck.get("goto"):
+                    chk(w + ".click", ck["goto"].get("scene") or sid, ck["goto"].get("label"))
             elif k in ("jump", "call"):
                 chk(w, op.get("scene") or sid, op.get("label"))
             elif k == "choice":

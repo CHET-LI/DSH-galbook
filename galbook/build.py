@@ -60,6 +60,10 @@ def main(argv=None):
         hist.get("choice", 0), hist.get("jump", 0), hist.get("end", 0),
         "   ← 一个选择点都没有，检查转换器是不是吞了选项" if len(scenes) > 3 and not hist.get("choice") else ""))
     st["ops"] = hist
+    clicks = [op["click"] for sc in scenes.values() for op in sc.get("ops", []) if op.get("op") == "say" and op.get("click")]
+    if clicks:
+        st["clicks"] = len(clicks)
+        print("特殊机制：可点的句子 %d 处（say.click；读的时候条件成立会在句尾挂 ◇，do=click 触发）" % len(clicks))
     print("统计：" + json.dumps({k: v for k, v in st.items() if k not in ("assets", "unknown")}, ensure_ascii=False))
     print("图片解析：" + json.dumps(st.get("assets"), ensure_ascii=False))
     print("未识别指令（前 20）：" + json.dumps(st.get("unknown"), ensure_ascii=False))

@@ -6,66 +6,146 @@
 [hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.85 "Noto Sans CJK SC","PingFang SC","Hiragino Sans",sans-serif}
 header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 header b{color:var(--acc)}select,input,button{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;font:inherit}
-button{cursor:pointer}button:hover{border-color:var(--acc)}button.pri{border-color:var(--acc);color:var(--acc)}
-main{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:0;min-height:calc(100vh - 54px)}
+button{cursor:pointer}button:hover{border-color:var(--acc)}button.pri{border-color:var(--acc);color:var(--acc)}button:disabled{opacity:.55;cursor:default}
+main{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:0;height:calc(100vh - 54px)}
+#col{display:flex;flex-direction:column;min-height:0;min-width:0}#wrap,#ctl{flex:none}
 #side{border-right:1px solid var(--line);padding:10px;overflow:auto}#side h3{margin:6px 0;font-size:13px;color:var(--dim);font-weight:normal}
 .pl{padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer;background:var(--card)}
 .pl:hover,.pl.on{border-color:var(--acc)}.pl small{color:var(--dim);display:block;line-height:1.5}
-#stage{position:relative;height:300px;background:#000 center/cover no-repeat;border-bottom:1px solid var(--line)}
-#stage .cg{position:absolute;inset:0;background:#000 center/contain no-repeat}
-#stage .sp{position:absolute;bottom:0;height:92%;max-width:40%;object-fit:contain}
-#text{padding:12px 18px;max-width:860px}.ln{margin:2px 0}.who{color:var(--acc);margin-right:.4em}
+/* 画面：按原作分辨率等比缩放（从背景图的原始尺寸自动得出），不裁切 */
+#wrap{background:#000;display:flex;justify-content:center;border-bottom:1px solid var(--line)}
+#stage{--ar:16/9;position:relative;width:min(100%,calc((100vh - 190px)*(var(--ar))));min-width:min(100%,320px);aspect-ratio:var(--ar);overflow:hidden;container-type:inline-size;background:#000;cursor:pointer;user-select:none}
+#stage .L{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .35s}
+#stage .L.on{opacity:1}
+#sprites{position:absolute;inset:0;pointer-events:none}
+#sprites .sp{position:absolute;transform:translateX(-50%);opacity:0;transition:opacity .3s;max-width:none}
+#sprites .sp.on{opacity:1}
+#sprites .ph{position:absolute;bottom:0;transform:translateX(-50%);width:16%;height:78%;border-radius:40% 40% 6px 6px/22% 22% 6px 6px;background:linear-gradient(#ffffff26,#ffffff10);border:1px dashed #ffffff40;display:flex;align-items:flex-start;justify-content:center;padding-top:6%;font-size:clamp(10px,1.6cqw,15px);color:#fff;text-shadow:0 1px 2px #000}
+#cg{z-index:3}#sprites{z-index:2}
+#tags{position:absolute;left:6px;top:4px;z-index:4;font-size:clamp(10px,1.4cqw,13px);color:#ffffffb0;text-shadow:0 1px 2px #000;line-height:1.5;pointer-events:none}
+#win{position:absolute;left:2.5%;right:2.5%;bottom:2.5%;z-index:5;min-height:22%;max-height:45%;overflow:auto;background:#0d0f14c8;border:1px solid #ffffff22;border-radius:10px;padding:1.4cqw 2.2cqw;font-size:clamp(13px,2.3cqw,22px);line-height:1.7}
+#win .nm{color:var(--acc);font-weight:bold;margin-bottom:.15em}
+#win .rb{color:var(--dim);font-size:.75em;margin-left:.6em}
+#win .clk{color:#cfe8ff;cursor:pointer;margin-left:.35em;padding:0 .15em}
+#win.off{display:none}
+#chs{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1.2cqw;background:#0006;padding:4%}
+#chs button{width:min(82%,640px);text-align:center;font-size:clamp(13px,2.1cqw,20px);background:#14161ae6;border-color:#ffffff40}
+@container (max-width:620px){#stage.choosing #win{display:none}}
+#chs button:hover{border-color:var(--acc)}#chs .meta{color:#fff;text-shadow:0 1px 2px #000}
+#text{padding:10px 18px;flex:1;min-height:0;overflow:auto}#text>div{max-width:900px}.ln{margin:2px 0;cursor:pointer;border-radius:4px;padding:0 4px}.ln:hover{background:#ffffff0d}.ln.cur{background:#e0b26a1a}.who{color:var(--acc);margin-right:.4em}
 .choice{margin:12px 0;padding:10px;border:1px dashed var(--acc);border-radius:8px}.choice button{display:block;margin:6px 0;width:100%;text-align:left}
-.bar{display:flex;gap:6px;flex-wrap:wrap;padding:8px 18px;border-bottom:1px solid var(--line)}
-.meta{color:var(--dim);font-size:13px}.err{color:#ff8a80}
-@media(max-width:720px){main{grid-template-columns:1fr}#side{border-right:0;border-bottom:1px solid var(--line);max-height:30vh}#stage{height:200px}}
+.bar{display:flex;gap:6px;flex-wrap:wrap;padding:8px 18px;border-bottom:1px solid var(--line);align-items:center}
+.meta{color:var(--dim);font-size:13px}.err{color:#ff8a80}#info:empty{display:none}#info{margin-bottom:10px}
+@media(max-width:720px){main{grid-template-columns:1fr;height:auto}#text{overflow:visible}#side{border-right:0;border-bottom:1px solid var(--line);max-height:26vh}#stage{width:100%}}
 </style></head><body>
 <header><b>galbook</b><select id="book"></select>
 <span class="meta">以</span><input id="agent" size="10" placeholder="名字" value="chet">
 <span class="meta">身份</span><button id="watch">只看</button><button class="pri" id="me">自己玩</button>
-<label class="meta"><input type="checkbox" id="img" checked> 图</label><span id="msg" class="meta"></span></header>
+<label class="meta"><input type="checkbox" id="img" checked> 画面</label><label class="meta"><input type="checkbox" id="stepmode" checked> 逐句</label><span id="msg" class="meta"></span></header>
 <main><div id="side"><h3>正在玩的 agent</h3><div id="players"></div><h3 style="margin-top:14px">玩法（给 agent）</h3>
-<div class="meta">GET <code>/play/t/&lt;书&gt;/&lt;名字&gt;?do=next</code><br>完整说明：<a href="/play/t" style="color:var(--acc)">/play/t</a> · <a href="/play/t?lang=en" style="color:var(--acc)">English</a><br>MCP：<code>python3 -m galbook mcp</code></div></div>
-<div><div id="stage"><div class="cg" id="cg" hidden></div></div>
+<div class="meta">GET <code>/play/t/&lt;书&gt;/&lt;名字&gt;?do=next</code><br>完整说明：<a href="/play/t" style="color:var(--acc)">/play/t</a> · <a href="/play/t?lang=en" style="color:var(--acc)">English</a><br>MCP：<code>python3 -m galbook mcp</code></div>
+<h3 style="margin-top:14px">操作</h3><div class="meta">点画面 / 空格 / 回车：下一句<br>点下面的台词：回看那一句的画面<br>H：隐藏对话框</div></div>
+<div id="col"><div id="wrap"><div id="stage"><img class="L" id="bgA" alt=""><img class="L" id="bgB" alt=""><div id="sprites"></div><img class="L" id="cg" alt="">
+<div id="tags"></div><div id="win"><div class="nm"></div><div class="tx"></div></div><div id="chs" hidden></div></div></div>
 <div class="bar" id="ctl"><select id="o_h" title="H 场景"><option value="fold">H 折叠</option><option value="full">H 展开</option><option value="skip">H 跳过</option></select>
 <select id="o_mode" title="模式"><option value="normal">普通</option><option value="ironman">铁人</option></select>
 <label class="meta"><input type="checkbox" id="o_hints"> 提示</label><button data-a="new">新游戏</button><button data-a="next" class="pri">往下读</button><button data-a="skip">跳过已读</button>
 <button data-a="persona">人设</button><button data-a="gallery">收集</button><button data-a="save">存档</button><button data-a="load">读档</button><button data-a="rewind">回到上个选项</button><button data-a="log">回想</button><button data-a="profile">记录</button></div>
-<div id="text"></div></div></main>
+<div id="text"><div id="info"></div><div id="hdr" class="meta"></div><div id="log"></div><div id="tail"></div></div></div></main>
 <script>
-const $=s=>document.querySelector(s);let BOOK="",AGENT="",WATCH=false,lines=[];
+const $=s=>document.querySelector(s);let BOOK="",AGENT="",WATCH=false;
 const enc=encodeURIComponent;const TOKEN=new URLSearchParams(location.search).get("token")||"";const AUTH=TOKEN?{"Authorization":"Bearer "+TOKEN}:{};
 async function api(a,body){const r=await fetch(`/play/api/${enc(BOOK)}/${enc(AGENT)}/${a}`,{method:body?"POST":"GET",headers:Object.assign({"Content-Type":"application/json"},AUTH),body:body?JSON.stringify(body):undefined});const j=await r.json();if(!j.ok){$("#msg").innerHTML=`<span class=err>${esc(j.error||"失败")}</span>`;throw j}$("#msg").textContent=j.msg||"";return j}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function plain(t){return esc(t).replace(/\[rb,([^,\]]+),([^\]]*)\]/g,"<ruby>$1<rt>$2</rt></ruby>").replace(/\[[A-Za-z]+(,[^\]]*)?\]/g,"").replace(/\n/g,"<br>")}
 function url(p){return p&&!/^(image|chara):/.test(p)?`/b/${enc(BOOK)}/${p.split("/").map(enc).join("/")}`:null}
-function vis(v){if(!$("#img").checked||!v){$("#stage").style.backgroundImage="";$("#cg").hidden=true;[...document.querySelectorAll(".sp")].forEach(e=>e.remove());return}
- const bg=url(v.bg);$("#stage").style.backgroundImage=bg?`url("${bg}")`:"";const cg=url(v.cg);$("#cg").hidden=!cg;if(cg)$("#cg").style.backgroundImage=`url("${cg}")`;
- [...document.querySelectorAll(".sp")].forEach(e=>e.remove());const sp=(v.sprites||[]).filter(s=>url(s.img));const pos={left:12,l:12,midl:28,center:50,c:50,midr:72,right:88,r:88};
- sp.forEach((s,i)=>{const im=document.createElement("img");im.className="sp";im.src=url(s.img);const x=pos[s.pos]??(100*(i+1)/(sp.length+1));im.style.left=x+"%";im.style.transform="translateX(-50%)";$("#stage").appendChild(im)})}
-function show(st,append){if(!append)lines=[];if(st.lines)lines=lines.concat(st.lines).slice(-80);let h=`<div class=meta>【${esc(st.where?.title)}】第 ${st.where?.turn??0} 句${st.skipped?`（跳过已读 ${st.skipped} 句）`:""}</div>`;
- h+=lines.map(l=>`<div class=ln>${l.who?`<span class=who>${esc(l.who)}</span>`:""}${plain(l.text)}</div>`).join("");
- if(st.choice){h+=`<div class=choice><div class=meta>${esc(st.choice.prompt||"选项")}</div>`+st.choice.options.map(o=>`<button ${WATCH?"disabled":""} data-i="${o.i}">${o.i}. ${esc(o.text)}${(o.marks||[]).map(m=>`<span class=meta> 〔${m==="new"?"新内容":"选过"}〕</span>`).join("")}</button>`).join("")+(st.choice.persona?`<div class=meta>人设：${esc(st.choice.persona)}</div>`:"")+`</div>`}
- if(st.ended)h+=`<div class=choice>—— 结束：${esc(st.ended.name)} ——</div>`;$("#text").innerHTML=h;vis(st.vis||(lines.at(-1)||{}).vis);
- document.querySelectorAll(".choice button[data-i]").forEach(b=>b.onclick=async()=>{const reason=prompt("为什么选这个？（会记下来）","")||"";await api("choose",{i:+b.dataset.i,reason});next(false)});window.scrollTo(0,document.body.scrollHeight)}
-async function next(skip){const j=await api("next",{n:20,skip_read:!!skip});show(j.state,true)}
-async function act(a){try{if(a==="next")return next(false);if(a==="skip")return next(true);
- if(a==="new"){const j=await api("new",{h:$("#o_h").value,mode:$("#o_mode").value,hints:$("#o_hints").checked?"1":"0"});return show(j.state)}
+function base(p){return String(p||"").replace(/^(image|chara):/,"").split("/").pop().replace(/\.[^.]+$/,"")}
+
+/* ---------- 画面 ---------- */
+let SCR={w:0,h:0},curBg=null,curCg=null,bgFront="#bgA",BAD=new Set(),SHOWN=null;
+const POS={left:.2,l:.2,midl:.34,ml:.34,lc:.34,center:.5,c:.5,mid:.5,midr:.66,mr:.66,rc:.66,right:.8,r:.8};
+function setScreen(w,h,learned){if(!(w>=200&&h>=150))return;if(SCR.w===w&&SCR.h===h)return;SCR={w,h};$("#stage").style.setProperty("--ar",w+"/"+h);
+ if(learned)try{localStorage["gb_scr_"+BOOK]=w+"x"+h}catch(e){}layoutSprites()}
+function loadScreen(){SCR={w:0,h:0};$("#stage").style.setProperty("--ar","16/9");try{const m=(localStorage["gb_scr_"+BOOK]||"").match(/^(\d+)x(\d+)$/);if(m)setScreen(+m[1],+m[2])}catch(e){}}
+function preload(lines){for(const l of lines||[]){const v=l.vis;if(!v)continue;[v.bg,v.cg,...(v.sprites||[]).map(s=>s.img)].forEach(p=>{const u=url(p);if(u&&!BAD.has(u)){const i=new Image();i.src=u}})}}
+function setBg(p){const u=url(p);if(u===curBg)return;curBg=u;const back=bgFront==="#bgA"?"#bgB":"#bgA",bi=$(back),fi=$(bgFront);
+ if(!u||BAD.has(u)){fi.classList.remove("on");bi.classList.remove("on");return}
+ bi.onload=()=>{if(curBg!==u)return;setScreen(bi.naturalWidth,bi.naturalHeight,true);bi.classList.add("on");fi.classList.remove("on");bgFront=back};
+ bi.onerror=()=>{BAD.add(u);if(curBg===u){fi.classList.remove("on");tags()}};bi.src=u}
+function setCg(p){const u=url(p),c=$("#cg");if(u===curCg)return;curCg=u;if(!u||BAD.has(u)){c.classList.remove("on");return}
+ c.onload=()=>{if(curCg!==u)return;if(!SCR.w)setScreen(c.naturalWidth,c.naturalHeight,true);c.classList.add("on")};c.onerror=()=>{BAD.add(u);c.classList.remove("on");tags()};c.src=u}
+function posX(s,i,n){const p=s.pos;if(p!=null&&POS[String(p).toLowerCase()]!=null)return POS[String(p).toLowerCase()];
+ const x=parseFloat(p);if(!isNaN(x))return x<=1?x:(SCR.w?x/SCR.w:.5);return n>1?(i+1)/(n+1):.5}
+function layoutOne(im){const w=im.naturalWidth,h=im.naturalHeight;if(!w||!h)return;const sw=SCR.w||1280,sh=SCR.h||720;
+ im.style.width=(100*w/sw)+"%";im.style.height="auto";im.style.left=(100*(+im.dataset.x))+"%";
+ if(h>sh*1.02){im.style.top="0";im.style.bottom=""}else{im.style.bottom="0";im.style.top=""}}   // 比画面高（近景立绘）就顶对齐，保住脸
+function layoutSprites(){document.querySelectorAll("#sprites .sp").forEach(layoutOne)}
+function setSprites(list){const box=$("#sprites"),keep=new Map();list=list||[];const n=list.length;
+ [...box.children].forEach(e=>keep.set(e.dataset.k,e));const want=new Set();
+ list.forEach((s,i)=>{const u=url(s.img),k=(s.name||"?")+"|"+(u||s.img),x=posX(s,i,n);want.add(k);let e=keep.get(k);
+  if(e){e.dataset.x=x;if(e.tagName==="IMG")layoutOne(e);else e.style.left=(100*x)+"%";return}
+  if(u&&!BAD.has(u)){e=document.createElement("img");e.className="sp";e.dataset.k=k;e.dataset.x=x;e.alt=s.name||"";
+   e.onload=()=>{layoutOne(e);e.classList.add("on")};e.onerror=()=>{BAD.add(u);const ph=phSprite(s,k,x);e.replaceWith(ph)};e.src=u}
+  else e=phSprite(s,k,x);box.appendChild(e)});
+ keep.forEach((e,k)=>{if(!want.has(k))e.remove()})}
+function phSprite(s,k,x){const d=document.createElement("div");d.className="ph";d.dataset.k=k;d.style.left=(100*x)+"%";d.textContent=s.name||base(s.img);d.title=s.img||"";return d}
+function tags(){const v=SHOWN||{},t=[];const miss=p=>p&&(!url(p)||BAD.has(url(p)));
+ if(miss(v.cg))t.push("CG："+esc(base(v.cg)));else if(!v.cg&&miss(v.bg))t.push("背景："+esc(base(v.bg)));$("#tags").innerHTML=t.join("<br>")}
+function vis(v){SHOWN=v||null;if(!$("#img").checked||!v){setBg(null);setCg(null);setSprites([]);$("#tags").innerHTML="";return}
+ setBg(v.bg);setCg(v.cg);$("#sprites").style.visibility=v.cg?"hidden":"visible";setSprites(v.sprites);tags()}
+
+/* ---------- 台词 / 逐句 ---------- */
+function scrollLog(){const t=$("#text");t.scrollTop=t.scrollHeight}
+let buf=[],last=null,pend=null,logN=0,busy=false;
+function lineHtml(l){return `${l.who?`<span class=who>${esc(l.who)}</span>`:""}${plain(l.text)}${l.mark?` <span class=clk>${esc(l.mark)}</span>`:""}`}
+function win(l,review){const w=$("#win");if(!l){w.querySelector(".nm").textContent="";w.querySelector(".tx").innerHTML="";return}
+ w.querySelector(".nm").textContent=l.who||"";w.querySelector(".tx").innerHTML=plain(l.text)+(l.mark?` <span class=clk>${esc(l.mark)}</span>`:"")+(review?`<span class=rb>（回看）</span>`:"")}
+function addLog(l){const d=document.createElement("div");d.className="ln";d.innerHTML=lineHtml(l);d._l=l;d.onclick=()=>{document.querySelectorAll(".ln.cur").forEach(x=>x.classList.remove("cur"));d.classList.add("cur");vis(l.vis);win(l,true)};
+ const g=$("#log");g.appendChild(d);while(g.children.length>200)g.firstChild.remove()}
+function display(l){last=l;addLog(l);document.querySelectorAll(".ln.cur").forEach(x=>x.classList.remove("cur"));$("#log").lastChild?.classList.add("cur");
+ if(l.vis)vis(l.vis);win(l);$("#chs").hidden=true;$("#stage").classList.remove("choosing");scrollLog()}
+function hdr(st){$("#hdr").innerHTML=st?`【${esc(st.where?.title)}】第 ${st.where?.turn??0} 句${st.skipped?`（跳过已读 ${st.skipped} 句）`:""}`:""}
+function choiceHtml(c,inStage){return `<div class=meta>${esc(c.prompt||"选项")}</div>`+c.options.map(o=>`<button ${WATCH?"disabled":""} data-i="${o.i}">${inStage?"":o.i+". "}${esc(o.text)}${(o.marks||[]).map(m=>`<span class=meta> 〔${m==="new"?"新内容":"选过"}〕</span>`).join("")}</button>`).join("")+(c.persona?`<div class=meta>人设：${esc(c.persona)}</div>`:"")}
+function finish(st){hdr(st);let h="";if(st.choice)h=`<div class=choice>${choiceHtml(st.choice)}</div>`;if(st.ended)h+=`<div class=choice>—— 结束：${esc(st.ended.name)} ——</div>`;$("#tail").innerHTML=h;
+ const cs=$("#chs");if(st.choice){cs.innerHTML=choiceHtml(st.choice,true);cs.hidden=false}else cs.hidden=true;$("#stage").classList.toggle("choosing",!!st.choice);
+ if(!last||!st.lines?.length)vis(st.vis);
+ document.querySelectorAll("#tail button[data-i],#chs button[data-i]").forEach(b=>b.onclick=async ev=>{ev.stopPropagation();const reason=prompt("为什么选这个？（会记下来）","");if(reason===null)return;
+  try{const j=await api("choose",{i:+b.dataset.i,reason});addLog({who:"",text:"▶ "+j.chosen.text});pend=null;$("#tail").innerHTML="";cs.hidden=true;step(false)}catch(e){}});scrollLog()}
+function feed(st,fresh,all){if(fresh){$("#log").innerHTML="";$("#tail").innerHTML="";last=null}preload(st.lines);pend=st;buf=(st.lines||[]).slice();hdr(st);
+ if(all||!$("#stepmode").checked||WATCH){buf.forEach(display);buf=[];finish(st);if(!st.lines?.length&&!st.choice&&!st.ended)win(null);return}
+ if(buf.length)display(buf.shift());if(!buf.length)finish(st)}
+async function step(skip){if(WATCH||busy)return;if(buf.length){display(buf.shift());if(!buf.length&&pend)finish(pend);return}
+ if(pend&&(pend.choice||pend.ended))return;busy=true;try{const j=await api("next",{n:20,skip_read:!!skip});feed(j.state)}catch(e){}finally{busy=false}}
+async function click(){try{const j=await api("click",{});if(j.clicked){buf=[];pend=null;$("#tail").innerHTML="";document.querySelectorAll(".clk").forEach(e=>e.remove());step(false)}}catch(e){}}
+$("#stage").addEventListener("click",ev=>{if(ev.target.closest("#chs"))return;if(ev.target.classList.contains("clk")){ev.stopPropagation();return click()}step(false)});
+$("#log").addEventListener("click",ev=>{if(ev.target.classList.contains("clk")&&ev.target.closest(".ln")===$("#log").lastChild&&!buf.length){ev.stopPropagation();click()}},true);
+document.addEventListener("keydown",ev=>{if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName||""))return;
+ if(ev.key===" "||ev.key==="Enter"){ev.preventDefault();step(false)}else if(ev.key==="h"||ev.key==="H"){$("#win").classList.toggle("off")}});
+
+/* ---------- 其他操作 ---------- */
+function info(h){$("#info").innerHTML=h?`<div class=choice>${h}<div style="text-align:right"><button onclick="info('')">收起</button></div></div>`:""}
+async function act(a){try{info("");if(a==="next")return step(false);if(a==="skip"){buf=[];return step(true)}
+ if(a==="new"){const j=await api("new",{h:$("#o_h").value,mode:$("#o_mode").value,hints:$("#o_hints").checked?"1":"0"});return feed(j.state,true)}
  if(a==="persona"){const cur=(await api("persona")).persona||"";const t=prompt("你的人设（性格/口味，选项时会提醒）",cur);if(t!==null)await api("persona",{text:t});return}
- if(a==="gallery"){const g=await api("gallery");$("#text").innerHTML=`<div class=choice>结局 ${g.endings.length}/${g.endings_total}：${esc(g.endings.join("、")||"-")}<br>路线 ${g.routes_seen.length}/${g.routes.length}：${esc(g.routes_seen.join("、")||"-")}<br>CG ${g.cg_seen}/${g.cg_total}<br>已读 ${(g.read_ratio*100).toFixed(1)}%，周目 ${g.games}</div>`;return}if(a==="save"){const s=prompt("存到哪个位置？(quick 或 1-99)","1");if(s)await api("save",{slot:s});return}
- if(a==="load"){const ss=(await api("saves")).saves;const s=prompt("读哪个？\n"+ss.map(x=>`[${x.slot}] ${x.title} 第${x.turn}句 ${x.preview||""}`).join("\n"),ss[0]?.slot||"auto");if(s){const j=await api("load",{slot:s});show(j.state)}return}
- if(a==="rewind"){const j=await api("rewind",{});return show(j.state)}
- if(a==="log"){const j=await api("log?n=60");$("#text").innerHTML=j.log.map(l=>`<div class=ln>${l.who?`<span class=who>${esc(l.who)}</span>`:""}${plain(l.text)}</div>`).join("")+"<hr>"+j.choices.map(c=>`<div class=meta>· ${esc(c.title)}：${esc(c.text)} ${c.reason?"（"+esc(c.reason)+"）":""}</div>`).join("");return}
- if(a==="profile"){const j=await api("profile");$("#text").innerHTML=`<pre style="white-space:pre-wrap">${esc(JSON.stringify(j,null,1))}</pre>`;return}}catch(e){}}
+ if(a==="gallery"){const g=await api("gallery");return info(`结局 ${g.endings.length}/${g.endings_total}：${esc(g.endings.join("、")||"-")}<br>路线 ${g.routes_seen.length}/${g.routes.length}：${esc(g.routes_seen.join("、")||"-")}<br>CG ${g.cg_seen}/${g.cg_total}<br>已读 ${(g.read_ratio*100).toFixed(1)}%，周目 ${g.games}`)}
+ if(a==="save"){const s=prompt("存到哪个位置？(quick 或 1-99)","1");if(s)await api("save",{slot:s});return}
+ if(a==="load"){const ss=(await api("saves")).saves;const s=prompt("读哪个？\n"+ss.map(x=>`[${x.slot}] ${x.title} 第${x.turn}句 ${x.preview||""}`).join("\n"),ss[0]?.slot||"auto");if(s){const j=await api("load",{slot:s});feed(j.state,true)}return}
+ if(a==="rewind"){const j=await api("rewind",{});return feed(j.state,true)}
+ if(a==="log"){const j=await api("log?n=60");return info(j.log.map(l=>`<div>${l.who?`<span class=who>${esc(l.who)}</span>`:""}${plain(l.text)}</div>`).join("")+"<hr>"+j.choices.map(c=>`<div class=meta>· ${esc(c.title)}：${esc(c.text)} ${c.reason?"（"+esc(c.reason)+"）":""}</div>`).join(""))}
+ if(a==="profile"){const j=await api("profile");return info(`<pre style="white-space:pre-wrap">${esc(JSON.stringify(j,null,1))}</pre>`)}}catch(e){}}
 document.querySelectorAll("#ctl button").forEach(b=>b.onclick=()=>act(b.dataset.a));
-async function status(){try{const j=await api("status");if(j.state){j.state.lines=j.state.recent||[];show(j.state)}else $("#text").innerHTML=`<div class=meta>${esc(AGENT)} 还没开始《${esc(j.title)}》</div>`}catch(e){}}
+async function status(){try{const j=await api("status");if(j.state){const st=j.state;st.lines=(st.recent||[]).map(x=>Object.assign({},x));if(st.lines.length)st.lines.at(-1).vis=st.vis;feed(st,true,true);vis(st.vis)}
+ else{$("#log").innerHTML="";$("#tail").innerHTML="";hdr(null);win(null);vis(null);$("#chs").hidden=true;$("#log").innerHTML=`<div class=meta>${esc(AGENT)} 还没开始《${esc(j.title)}》${WATCH?"":"——点「新游戏」"}</div>`}}catch(e){}}
 async function players(){if(!BOOK)return;const j=await (await fetch(`/play/api/${enc(BOOK)}/players`,{headers:AUTH})).json();
  $("#players").innerHTML=(j.players||[]).map(p=>`<div class="pl ${p.agent===AGENT?"on":""}" data-a="${esc(p.agent)}"><b>${esc(p.agent)}</b><small>第 ${p.run.turn??0} 句 · 选择 ${p.run.choices} 次${p.run.pending?" · 正在想选项":""}${p.run.ended?" · 已结束":""}<br>${esc(p.run.scene||"")}</small></div>`).join("")||"<div class=meta>还没人玩</div>";
  document.querySelectorAll(".pl").forEach(e=>e.onclick=()=>{AGENT=e.dataset.a;$("#agent").value=AGENT;WATCH=true;$("#ctl").hidden=true;status();players()})}
+function resetStage(){curBg=curCg=null;SHOWN=null;["#bgA","#bgB","#cg"].forEach(s=>{$(s).classList.remove("on");$(s).removeAttribute("src")});$("#sprites").innerHTML="";loadScreen();buf=[];pend=null;last=null}
 async function init(){const j=await (await fetch("/play/api/books",{headers:AUTH})).json();$("#book").innerHTML=j.books.filter(b=>b.playable!==false).map(b=>`<option value="${esc(b.slug)}">${esc(b.title||b.slug)}（${b.mode==="branch"?"有选项":"按卷"}）</option>`).join("");
- BOOK=new URLSearchParams(location.search).get("book")||$("#book").value;$("#book").value=BOOK;AGENT=$("#agent").value;status();players();setInterval(()=>{players();if(WATCH)status()},5000)}
-$("#book").onchange=()=>{BOOK=$("#book").value;status();players()};
-$("#me").onclick=()=>{AGENT=$("#agent").value.trim();WATCH=false;$("#ctl").hidden=false;status();players()};
-$("#watch").onclick=()=>{AGENT=$("#agent").value.trim();WATCH=true;$("#ctl").hidden=true;status()};
-$("#img").onchange=()=>vis((lines.at(-1)||{}).vis);init();
+ BOOK=new URLSearchParams(location.search).get("book")||$("#book").value;$("#book").value=BOOK;AGENT=new URLSearchParams(location.search).get("agent")||$("#agent").value;$("#agent").value=AGENT;
+ if(new URLSearchParams(location.search).get("watch")==="1"){WATCH=true;$("#ctl").hidden=true}resetStage();status();players();setInterval(()=>{players();if(WATCH)status()},5000)}
+$("#book").onchange=()=>{BOOK=$("#book").value;resetStage();status();players()};
+$("#me").onclick=()=>{AGENT=$("#agent").value.trim();WATCH=false;$("#ctl").hidden=false;resetStage();status();players()};
+$("#watch").onclick=()=>{AGENT=$("#agent").value.trim();WATCH=true;$("#ctl").hidden=true;resetStage();status()};
+$("#img").onchange=()=>vis(($("#log .ln.cur")||{})._l?.vis||last?.vis||pend?.vis);
+window.addEventListener("resize",layoutSprites);init();
 </script></body></html>

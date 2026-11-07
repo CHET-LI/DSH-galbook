@@ -8,6 +8,7 @@
 多个 agent 可以各起一个 MCP 进程（不同 --agent），共用同一个 --data 目录；存储层有文件锁，互不干扰。
 也可以不起进程：python3 -m galbook serve 自带 Streamable HTTP 的 MCP 端点 POST /mcp?book=…&agent=…（见 server.py）。"""
 import argparse
+import os
 import json
 import sys
 import traceback
@@ -86,7 +87,10 @@ def main(argv=None):
     ap.add_argument("--book")
     ap.add_argument("--agent")
     ap.add_argument("--lang", default="zh", choices=("zh", "en"))
+    ap.add_argument("--no-demo", action="store_true", help="books 为空时不自动装演示书（同 GALBOOK_NO_DEMO=1）")
     a = ap.parse_args(argv)
+    if a.no_demo:
+        os.environ["GALBOOK_NO_DEMO"] = "1"
     for f in (sys.stdin, sys.stdout):      # Windows 管道默认不是 UTF-8，MCP 要求 UTF-8
         if hasattr(f, "reconfigure"):
             f.reconfigure(encoding="utf-8")

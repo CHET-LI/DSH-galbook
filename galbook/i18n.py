@@ -60,6 +60,8 @@ _ERR = [
     (r"^do 只能是：(.*)", r"do must be one of: \1"),
     (r"^新游戏开始（第 (\d+) 周目）", r"New game started (playthrough #\1)"),
     (r"^已存到 (.*)", r"Saved to \1"), (r"^读档 (.*)", r"Loaded \1"), (r"^回到选项点", "Back at the choice point"),
+    (r"^点了一下，什么也没发生。", "You click. Nothing happens."), (r"^点了一下。$", "Click."),
+    (r"^点击效果执行失败：(.*)", r"Click effect failed: \1"),
     (r"^人设已记下", "Persona saved"), (r"^人设已清空", "Persona cleared"),
     (r"^路径多了一段.*", "Too many path segments: /play/t/<book>/<name>?do=…"),
 ]

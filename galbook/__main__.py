@@ -10,7 +10,9 @@
                                       python3 -m galbook do next n=20 ；python3 -m galbook do books ；python3 -m galbook do help
   tools   打印工具定义                python3 -m galbook tools --format openai|mcp
   demo    装自带的演示故事到 books/   python3 -m galbook demo --books books
-  version"""
+  version
+
+  serve / mcp / play / do 都认 --no-demo（或环境变量 GALBOOK_NO_DEMO=1）：books 为空时不自动装演示书"""
 import sys
 
 
@@ -75,6 +77,9 @@ def main(argv=None):
         print(__doc__)
         return 0
     cmd, rest = a[0], a[1:]
+    if cmd in ("serve", "mcp", "play", "do"):
+        from .demo_boot import no_demo_flag
+        rest = no_demo_flag(rest)
     if cmd == "build":
         from .build import main as m
     elif cmd == "serve":

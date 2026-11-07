@@ -172,7 +172,7 @@ def main() -> int:
         print("  ! 剧本目录还没有书，先装演示书（中文 + 英文两本）：")
         print(f"    \"{a.python or sys.executable}\" -m galbook demo --books \"{a.books}\"")
     print("  1) 重启 DeepSeek Harness（配置只在启动时读）")
-    print("  2) 新建会话，问它：galbook 有哪些工具？应能看到 14 个")
+    print("  2) 新建会话，问它：galbook 有哪些工具？应能看到 15 个")
     print("  3) 想先验证不重启：手动给 python -m galbook mcp 发一条 initialize")
     print("  卸载：python dsh-plugin/install.py --remove")
     return 0

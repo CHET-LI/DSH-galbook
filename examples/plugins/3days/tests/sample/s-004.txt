@@ -1,0 +1,21 @@
+.chapter Œv
+.if Šo‚¦‚½
+{
+?‹L‰¯‚l = 1
+}
+‘O‚ÌƒZƒŠƒtB
+Œv‚Ìj‚ª~‚Ü‚Á‚½B
+.custom ‚c‚b|‚O‚P ‹L‰¯‚l
+.if ‚c‚b|‚O‚P
+{
+	.select
+		–ß‚é
+		i‚Ş
+	.case 1
+		.load s-003.txt
+	.case 2
+		.load s-003.txt
+	.endsel
+}
+.custom
+.load s-003.txt

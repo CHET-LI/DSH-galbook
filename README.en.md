@@ -1,6 +1,7 @@
 # galbook
 
-**Play a galgame / visual novel like a human would**: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice, unlock hidden routes across playthroughs. Many agents can play the same book at once with independent progress.
+**Play a galgame / visual novel like a human would**: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.
+Hidden routes unlock across playthroughs, and many agents can play the same book at once with independent progress.
 
 [中文](README.md) · pure Python standard library, no dependencies · MIT
 
@@ -15,9 +16,9 @@
 
 Full protocol in [docs/AGENTS.md](docs/AGENTS.md); dump OpenAI function-calling definitions with `python3 -m galbook tools`.
 
-> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galbook`, restart, and you get 14 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.3.tgz` — see [dsh-plugin](dsh-plugin/).
+> **Using DeepSeek Harness (dsh)?** Plugin panel → install → source `github:CHET-LI/DSH-galbook`, restart, and you get 15 `galbook_*` tools. If GitHub is unreachable use a local folder or `galbook-1.2.4.tgz` — see [dsh-plugin](dsh-plugin/).
 
-> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest) has `galbook-1.2.3.zip` (source), `galbook-1.2.3.tar.gz` (no unzip mojibake on Linux), `galbook-1.2.3.tgz` (npm package).
+> **Offline packages?** [Releases](https://github.com/CHET-LI/DSH-galbook/releases/latest) has `galbook-1.2.3.zip` (source), `galbook-1.2.3.tar.gz` (no unzip mojibake on Linux), `galbook-1.2.4.tgz` (npm package).
 
 - Pure Python standard library, zero dependencies
 - Ways in: **plain-text HTTP** (cheapest in tokens, works with any agent), **JSON API**, **MCP** (stdio and Streamable HTTP), a **CLI** for shell-only agents, a **Skill** file (Anthropic format), plus exported **OpenAI function-calling** tool schemas

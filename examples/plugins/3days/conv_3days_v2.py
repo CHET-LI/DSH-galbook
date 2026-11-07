@@ -44,7 +44,7 @@ ENCODINGS = ("utf-8-sig", "cp932", "gbk", "big5", "utf-16")
 # 明显乱码：半角片假名、希伯来/阿拉伯、私用区、C1 控制符、替换符
 SUSPECT = re.compile(r"[\uff61-\uff9f\u0590-\u06ff\ue000-\uf8ff\u0080-\u009f\ufffd]")
 IGNORED = {".wait", ".fade", ".fadein", ".fadeout", ".se", ".mode", ".filter", ".shake", ".flash", ".date",
-           ".wipe", ".custom", ".env", ".reset", ".clear_img", "."}
+           ".wipe", ".env", ".reset", ".clear_img", "."}
 VAR = re.compile(r"[A-Za-z_\u0080-\uffff][\w\u0080-\uffff]*")
 TAGS = re.compile(r"\{rb:[^}]*\}|\[ruby[^\]]*\]|\[/?(?:color|c|font|b|i)[^\]]*\]|</?(?:color|font|ruby|rt|rb|b|i)[^>]*>|\\[cC]\[\d+\]")
 
@@ -313,7 +313,7 @@ def trans_set(body):
     m = re.match(r"(.+?)\s*(\+=|-=|=)\s*(.+)$", body)
     if not m:
         return None
-    name, op, val = m.group(1).strip(), m.group(2), m.group(3).strip()
+    name, op, val = _fw_digits(m.group(1).strip()), m.group(2), m.group(3).strip()
     val = trans_expr(_fw_digits(val)).replace("==", "=")
     return "f.%s %s %s" % (name, op, val)
 
@@ -522,6 +522,8 @@ class Compiler(object):
                 self.add(conds, "event", name="system", arg=arg)
             elif cmd == ".movie":
                 self.add(conds, "event", name="movie", arg=arg)
+            elif cmd == ".custom":
+                self.custom(arg, conds, tk)
             elif cmd in IGNORED:
                 self.ctx.ignored[cmd] = self.ctx.ignored.get(cmd, 0) + 1
             else:
@@ -535,8 +537,33 @@ class Compiler(object):
         text = clean_text(text)
         if not text:
             return
-        self.add(conds, "say", who=who, text=text, voice=self.voice)
+        d = self.add(conds, "say", who=who, text=text, voice=self.voice)
         self.voice = None
+        if getattr(self, "_click_wait", None):
+            d["click"] = self._click_wait
+            self._click_wait = None
+
+    def custom(self, arg, conds, tk):
+        """.custom ＤＣ－０７ 瑠花とおふろＭ = 「凯罗斯时钟」点击点：
+        有那段记忆（第二个参数的 Ｍ 旗）时，在这之前的那句台词上点时钟 → ＤＣ－０７=1 → 后面的 .if ＤＣ－０７ 隐藏选项才出现。
+        不点就走默认 .load。转成 say 上的 click 字段（play.py 处理），引擎不改。
+        不带参数的 .custom（无条件的演出调用）照旧忽略。"""
+        toks = arg.split()
+        if not toks:
+            self.ctx.ignored[".custom"] = self.ctx.ignored.get(".custom", 0) + 1
+            return
+        dc = _fw_digits(toks[0])
+        if not re.match(r"^[\w\u0080-\uffff]+$", dc):
+            self.ctx.unknown.append("%s:%d .custom 参数看不懂 %r" % (self.f, tk.ln, arg[:40]))
+            return
+        need = [self.cond(toks[1], tk)] if len(toks) > 1 else []
+        click = {"id": dc, "set": "f.%s = 1" % dc, "if": _and(list(conds) + need + ["!(f.%s)" % dc])}
+        last = next((o for o in reversed(self.ops) if o.get("op") == "say"), None)
+        if last is not None and "click" not in last:
+            last["click"] = click
+        else:
+            self._click_wait = click        # 这一场景里前面没台词：挂到下一句
+        self.ctx.clicks = getattr(self.ctx, "clicks", 0) + 1
 
 
 NAME_BAD = re.compile(r"[\s。、，！!「」『』（）()…—―]")
@@ -637,7 +664,7 @@ def build(src, assets=None, entry=None, **opts):
             "importer": "conv_3days_v2", "mode": "branch", "author": "Lass / 3days汉化组",
             "license": "素材版权归原厂", "entry": {"scene": ent, "label": None},
             "scenes": meta_sc, "routes": [], "system_vars": [],
-            "stats": {"choices": ctx.n_sel, "system_choices": ctx.n_sys_sel, "if_blocks": ctx.n_if,
+            "stats": {"choices": ctx.n_sel, "clicks": getattr(ctx, "clicks", 0), "system_choices": ctx.n_sys_sel, "if_blocks": ctx.n_if,
                       "eof_ret_auto": ctx.n_eof_ret, "case_break_auto": ctx.n_case_break,
                       "decode_replaced_lines": len(decode_warns), "mixed_encoding_files": enc_mixed,
                       "ignored": ctx.ignored, "unknown": ctx.unknown[:20], "scenes": len(scenes)},

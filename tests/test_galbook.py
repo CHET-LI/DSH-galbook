@@ -458,3 +458,111 @@ class TestCoverage(unittest.TestCase):
                 rc = build_main(["--src", os.path.join(SAMPLES, eng), "--out", os.path.join(tempfile.mkdtemp(), "story"),
                                  "--engine", eng, "--dry-run"])
             self.assertEqual(rc, 0, "%s: %s" % (eng, buf.getvalue()[-400:]))
+
+
+class TestClick(unittest.TestCase):
+    """特殊机制：某句台词上「点一下」才出现的隐藏选项（3days 的凯罗斯时钟）。
+    say.click = {id, set|goto, if}；条件成立时那句后面挂 ◇，do=click 才生效；不点就走默认路。"""
+
+    def _lib(self, mem):
+        meta = {"format": "galbook/1", "title": "钟", "engine": "test", "mode": "branch",
+                "entry": {"scene": "a"}, "scenes": {}}
+        scenes = {
+            "a": {"title": "一", "ops": ([{"op": "set", "expr": "f.mem = 1"}] if mem else []) + [
+                {"op": "say", "text": "前一句。"},
+                {"op": "say", "text": "钟停了。", "click": {"id": "DC1", "set": "f.DC1 = 1", "if": "f.mem && !f.DC1"}},
+                {"op": "choice", "options": [{"text": "回去", "goto": {"scene": "h"}, "if": "f.DC1"},
+                                             {"text": "不回", "goto": {"scene": "b"}, "if": "f.DC1"}]},
+                {"op": "jump", "scene": "b"}]},
+            "b": {"title": "默认", "ops": [{"op": "say", "text": "默认路。"}, {"op": "end", "name": "普通结局"}]},
+            "h": {"title": "隐藏", "ops": [{"op": "say", "text": "隐藏路。"}, {"op": "end", "name": "隐藏结局"}]},
+        }
+        self.assertEqual(validate(meta, scenes), [])
+        self.tmp = tempfile.mkdtemp()
+        save_story(os.path.join(self.tmp, "books", "c", "story"), meta, scenes)
+        return Library(os.path.join(self.tmp, "books"), os.path.join(self.tmp, "data"))
+
+    def tearDown(self):
+        shutil.rmtree(getattr(self, "tmp", ""), ignore_errors=True)
+
+    def test_no_memory_no_mark_and_click_does_nothing(self):
+        lib = self._lib(mem=False)
+        lib.act("c", "a", "new")
+        r = lib.act("c", "a", "next", n=50)
+        self.assertFalse(any(ln.get("mark") for ln in r["state"]["lines"]))
+        self.assertEqual(r["state"]["ended"]["name"], "普通结局")
+        self.assertFalse(lib.act("c", "a", "click")["clicked"])
+
+    def test_mark_then_click_reveals_hidden_choice(self):
+        from galbook.web import render_text
+        lib = self._lib(mem=True)
+        lib.act("c", "a", "new")
+        r = lib.act("c", "a", "next", n=50)            # 一口气读过去：批次内容不变，只多一个 ◇
+        lines = r["state"]["lines"]
+        self.assertEqual([ln["text"] for ln in lines], ["钟停了。", "默认路。"])
+        self.assertEqual([ln.get("mark") for ln in lines], ["◇", None])
+        self.assertEqual(r["state"]["ended"]["name"], "普通结局")
+        txt = render_text(r, "next", False, "c", "a")
+        self.assertIn("钟停了。 ◇", txt)
+        self.assertNotIn("click", txt)                  # 不解释
+        c = lib.act("c", "a", "click")
+        self.assertTrue(c["clicked"])
+        r2 = lib.act("c", "a", "next", n=50)
+        self.assertEqual([o["text"] for o in r2["state"]["choice"]["options"]], ["回去", "不回"])
+        lib.act("c", "a", "choose", i=1)
+        r3 = lib.act("c", "a", "next", n=50)
+        self.assertEqual(r3["state"]["ended"]["name"], "隐藏结局")
+        st = lib.store.peek_run("c", "a")
+        self.assertEqual(st["f"].get("click_DC1"), 1)    # 存档 flags 里记下点过
+        self.assertNotIn("_click", st)
+        self.assertEqual(lib.act("c", "a", "click")["clicked"], False)   # 窗口只在那一批
+
+    def test_window_closes_after_next_batch(self):
+        lib = self._lib(mem=True)
+        lib.act("c", "a", "new")
+        r = lib.act("c", "a", "next", n=1)
+        self.assertEqual(r["state"]["lines"][-1].get("mark"), "◇")
+        lib.act("c", "a", "next", n=50)
+        self.assertFalse(lib.act("c", "a", "click")["clicked"])
+
+    def test_validate_click_target(self):
+        meta = {"format": "galbook/1", "entry": {"scene": "a"}, "scenes": {}}
+        sc = {"a": {"ops": [{"op": "say", "text": "x", "click": {"id": "k", "goto": {"scene": "zz"}}}, {"op": "end"}]}}
+        self.assertTrue(any("zz" in p for p in validate(meta, sc)))
+        sc["a"]["ops"][0] = {"op": "bg", "img": None, "click": {"set": "f.x=1"}}
+        self.assertTrue(any("click" in p for p in validate(meta, sc)))
+
+
+class TestNoDemo(unittest.TestCase):
+    def test_env_and_flag_disable_demo_install(self):
+        from galbook.demo_boot import no_demo_flag
+        tmp = tempfile.mkdtemp()
+        old = os.environ.pop("GALBOOK_NO_DEMO", None)
+        try:
+            Library(os.path.join(tmp, "b1"), os.path.join(tmp, "d1"), demo=False)
+            self.assertFalse(os.path.isdir(os.path.join(tmp, "b1")) and os.listdir(os.path.join(tmp, "b1")))
+            self.assertEqual(no_demo_flag(["--books", "x", "--no-demo"]), ["--books", "x"])
+            self.assertEqual(os.environ.get("GALBOOK_NO_DEMO"), "1")
+            Library(os.path.join(tmp, "b2"), os.path.join(tmp, "d2"))          # 环境变量生效
+            self.assertFalse(os.path.isdir(os.path.join(tmp, "b2")) and os.listdir(os.path.join(tmp, "b2")))
+            del os.environ["GALBOOK_NO_DEMO"]
+            Library(os.path.join(tmp, "b3"), os.path.join(tmp, "d3"))          # 默认照旧自动装
+            self.assertTrue(os.listdir(os.path.join(tmp, "b3")))
+        finally:
+            os.environ.pop("GALBOOK_NO_DEMO", None)
+            if old is not None:
+                os.environ["GALBOOK_NO_DEMO"] = old
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_mcp_no_demo_stdout_clean(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            req = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}) + "\n"
+            p = subprocess.run([sys.executable, "-m", "galbook", "mcp", "--books", os.path.join(tmp, "b"), "--data",
+                                os.path.join(tmp, "d"), "--no-demo"], input=req, capture_output=True, text=True,
+                               cwd=ROOT, timeout=60)
+            lines = [x for x in p.stdout.splitlines() if x.strip()]
+            self.assertTrue(lines and all(json.loads(x).get("jsonrpc") == "2.0" for x in lines), p.stdout + p.stderr)
+            self.assertFalse(os.path.isdir(os.path.join(tmp, "b")) and os.listdir(os.path.join(tmp, "b")))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

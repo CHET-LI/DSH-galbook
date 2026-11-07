@@ -42,6 +42,7 @@ TOOLS = [
         "text": {"type": "string", "description": "omit to show; empty string to clear"}}),
     ("galbook_gallery", "gallery", "Collection progress: endings, routes, CG, read ratio. / 收集进度", {}),
     ("galbook_profile", "profile", "Stats and human-likeness numbers. / 记录", {}),
+    ("galbook_click", "click", "Click the screen. / 点一下画面", {}),
 ]
 
 

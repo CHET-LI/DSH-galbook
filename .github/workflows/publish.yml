@@ -1,0 +1,36 @@
+name: publish
+# 推 v* tag 时：测试 + README 核对 + 版本 = tag 核对，全过才 npm publish。
+# 需要在仓库 Settings → Secrets → Actions 里加 NPM_TOKEN（npm 的 Automation token）；没配就只跑检查、跳过发布。
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - name: tests
+        run: python -m unittest discover -s tests -v
+      - name: README claims
+        run: python scripts/verify_claims.py
+      - name: version matches tag
+        run: python scripts/release.py --check --expect "${GITHUB_REF_NAME#v}"
+      - name: npm publish
+        if: env.NPM_TOKEN != ''
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: no token
+        if: env.NPM_TOKEN == ''
+        run: echo "::warning::NPM_TOKEN secret not set; checks passed but npm publish was skipped"

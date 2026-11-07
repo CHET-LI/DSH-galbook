@@ -286,7 +286,7 @@ def render_text(r, do, img, book, agent, lang="zh"):
                 if v and v != last_vis:
                     L.append(v)
                     last_vis = v
-            L.append(_say(ln, lang))
+            L.append(_say(ln, lang) + (" " + ln["mark"] if ln.get("mark") else ""))
         if st.get("skipped"):
             L.append(t(lang, "skipped", n=st["skipped"]))
         for e in st.get("events") or []:

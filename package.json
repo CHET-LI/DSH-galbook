@@ -1,8 +1,8 @@
 {
   "name": "galbook",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "type": "module",
-  "description": "Let an AI agent play galgames/visual novels by itself: read line by line, choose on its own with a written reason, save/load/rewind. Ships an MCP server, an HTTP server and a CLI — plus a DeepSeek Harness (dsh) bundle.",
+  "description": "Play a galgame / visual novel like a human would: read one line at a time, pick choices yourself and write down why, save, load, rewind to the last choice. Ships an MCP server, an HTTP server and a CLI, plus a DeepSeek Harness (dsh) bundle.",
   "license": "MIT",
   "author": "CHET-LI",
   "homepage": "https://github.com/CHET-LI/DSH-galbook",
@@ -26,11 +26,15 @@
     "galbook"
   ],
   "icon": "./icon.svg",
+  "bin": {
+    "galbook": "bin/galbook.js"
+  },
   "exports": {
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json"
   },
   "files": [
+    "bin/**",
     "galbook/**",
     "cordis.patch.yml",
     "locale/*.json",
@@ -39,11 +43,16 @@
     "README.en.md",
     "LICENSE",
     "dsh-plugin/**",
-    ".agents/**"
+    ".agents/**",
+    "!**/__pycache__/**",
+    "!**/*.pyc"
   ],
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
