@@ -11,7 +11,7 @@ import sys
 
 from .importers import detect, get, load_plugin, names
 from .importers.common import Assets
-from .ir import validate, save_story
+from .ir import validate, save_story, story_from_dict
 
 
 def main(argv=None):
@@ -65,6 +65,9 @@ def main(argv=None):
     print("未识别指令（前 20）：" + json.dumps(st.get("unknown"), ensure_ascii=False))
     print("警告 %d 条%s" % (len(meta.get("warnings", [])), ("：" + "；".join(meta["warnings"][:5])) if meta.get("warnings") else ""))
     print("校验：%s" % ("通过" if not probs else "%d 个问题：%s" % (len(probs), "；".join(probs[:10]))))
+    _w = story_from_dict(meta, scenes).warnings
+    if _w:
+        print("可疑：" + "；".join(_w))
     if a.strict and (probs or st.get("unknown")):
         print("--strict：有未识别指令或校验问题，按约定失败")
         return 1

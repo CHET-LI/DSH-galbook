@@ -276,11 +276,24 @@ class TestHTTPConcurrent(unittest.TestCase):
             try:
                 name = "agent%02d" % k
                 pick = 1 + k % 2
-                self.get("/play/t/light/%s?do=new" % name)
+
+                def g(u, _try=0):
+                    # 50 条并发打同一个单线程测试服务，Windows 上偶尔 RST（listen backlog），
+                    # 这不是被测行为，重试一次；连续两次才算失败。
+                    try:
+                        return self.get(u)
+                    except Exception as e:  # noqa
+                        if _try or not isinstance(e, Exception):
+                            raise
+                        if "ConnectionReset" in repr(e) or "10054" in repr(e):
+                            return g(u, 1)
+                        raise
+
+                g("/play/t/light/%s?do=new" % name)
                 for _ in range(30):
-                    _, t = self.get("/play/t/light/%s?do=next&n=5" % name)
+                    _, t = g("/play/t/light/%s?do=next&n=5" % name)
                     if "—— 选项" in t:
-                        self.get("/play/t/light/%s?do=choose&i=%d&reason=%s" % (name, pick, urllib.parse.quote("测试")))
+                        g("/play/t/light/%s?do=choose&i=%d&reason=%s" % (name, pick, urllib.parse.quote("测试")))
                     elif "—— 结束" in t:
                         endings[name] = t
                         return
@@ -413,3 +426,21 @@ class TestCoverage(unittest.TestCase):
             self.assertEqual(b["jumps"], 1)
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_linear_branch_book_warns(self):
+        """标了多条路线却一个选择点都没有 —— 要能自己喊出来（3days 就是这么被吞的）。"""
+        meta = {"format": "galbook/1", "title": "假分支", "engine": "test", "mode": "branch",
+                "entry": {"scene": "a"}, "scenes": {},
+                "routes": [{"id": "r1", "title": "共通"}, {"id": "r2", "title": "雫"}]}
+        st = story_from_dict(meta, {"a": {"title": "一", "ops": [{"op": "say", "text": "x"},
+                                                               {"op": "jump", "scene": "a"}]}})
+        self.assertTrue(any("0 个选择点" in w for w in st.warnings), st.warnings)
+        self.assertEqual(st.problems, [], "有出口就不算坏，只是可疑")
+
+    def test_no_warning_when_choice_exists(self):
+        meta = {"format": "galbook/1", "entry": {"scene": "a"}, "scenes": {},
+                "routes": [{"id": "r1"}, {"id": "r2"}]}
+        st = story_from_dict(meta, {"a": {"ops": [{"op": "choice", "id": "s1",
+                                                   "options": [{"text": "A", "goto": {"scene": "a"}},
+                                                               {"text": "B", "goto": {"scene": "a"}}]}]}})
+        self.assertEqual(st.warnings, [])

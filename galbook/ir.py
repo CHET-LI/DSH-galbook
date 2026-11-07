@@ -99,6 +99,21 @@ class Story(object):
         return None
 
     @property
+    def warnings(self):
+        """可疑但不致命：分支被压成直线这类。跟 problems（真的坏了）分开。"""
+        if not hasattr(self, "_warnings"):
+            w = []
+            ch = self.op_counts.get("choice", 0)
+            if len(self.routes) > 1 and ch == 0:
+                w.append("这本标了 %d 条路线，但全库 0 个选择点——转换时选项可能被当成普通台词吞掉了"
+                         % len(self.routes))
+            elif len(self.scenes) > 20 and ch == 0:
+                w.append("全库 %d 场、0 个选择点；若原作有分支，检查转换器是否丢了 .select / 选项块"
+                         % len(self.scenes))
+            self._warnings = w
+        return self._warnings
+
+    @property
     def op_counts(self):
         """全库 op 计数（say/choice/jump/end…）。choice 为 0 的分支书 = 转换时把选项丢了。"""
         if not hasattr(self, "_op_counts"):

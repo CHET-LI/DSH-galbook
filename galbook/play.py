@@ -35,7 +35,8 @@ class Library(object):
                         "scenes": len(st.scenes), "routes": [r.get("title") for r in st.routes],
                         "players": len(self.store.agents(slug)),
                         "problem_count": len(st.problems), "problems": st.problems[:20],
-                        "choices": st.op_counts.get("choice", 0), "jumps": st.op_counts.get("jump", 0)})
+                        "choices": st.op_counts.get("choice", 0), "jumps": st.op_counts.get("jump", 0),
+                        "warnings": st.warnings})
         return out
 
     def story(self, slug):
